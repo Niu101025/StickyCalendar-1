@@ -8,4 +8,6 @@ object Consts
 
 	var notificationIdUpdated = 10
 
+	var notificationIdDynamicFrom = 100
+
 }

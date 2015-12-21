@@ -27,6 +27,10 @@
 
 package com.github.quarck.stickycal
 
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -64,13 +68,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 			MSG_RELOAD_SETTINGS ->
 			{
 				Lw.d(TAG, "Explicit request to reload config")
-				update(null)
-			}
-
-			MSG_LIST_RECENT_NOTIFICATIONS ->
-			{
-				Lw.d(TAG, "Req for recent notifications")
-				sendRecent(msg)
+				update(null, false)
 			}
 		}
 
@@ -82,7 +80,8 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		Lw.d(TAG, "handleCheckPermissions")
 		try
 		{
-			activeNotifications
+			var notifications = activeNotifications
+			Lw.e(TAG, "Got ${notifications.size} notifications during check")
 		}
 		catch (ex: NullPointerException)
 		{
@@ -115,18 +114,6 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 			Lw.e(TAG, "Got exception, have no permissions!")
 			reply(msg, Message.obtain(null, MSG_NO_PERMISSIONS, 0, 0))
 		}
-
-		return true
-	}
-
-	private fun sendRecent(msg: Message): Boolean
-	{
-		Lw.d(TAG, "sendRecent")
-
-		val notifications = getRecentNotifications()
-
-		if (notifications != null)
-			reply(msg, Message.obtain(null, MSG_LIST_RECENT_NOTIFICATIONS, 0, 0, notifications))
 
 		return true
 	}
@@ -170,21 +157,69 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		return super.onBind(intent)
 	}
 
-	private fun update(addedOrRemoved: StatusBarNotification?)
+	private var nextNotificationId = Consts.notificationIdDynamicFrom
+
+
+	fun postNotification(context: Context, ntf: Notification)
 	{
-		Lw.d(TAG, "update")
+		var extras = ntf.extras;
 
-		if (addedOrRemoved != null && addedOrRemoved.packageName != Consts.packageName)
+		var title : String = "";
+		var text : String = "";
+
+		if (extras != null)
 		{
-			synchronized (NotificationReceiverService::class.java) {
-				recentNotifications.put(
-					addedOrRemoved.packageName,
-					System.currentTimeMillis())
+			if ((extras.get(Notification.EXTRA_TITLE) == null && extras.get(Notification.EXTRA_TITLE_BIG) == null)
+				|| (extras.get(Notification.EXTRA_TEXT) == null && extras.get(Notification.EXTRA_TEXT_LINES) == null))
+			{
+			}
+			else
+			{
+				if (extras.get(Notification.EXTRA_TITLE_BIG) != null)
+				{
+					var bigTitle = extras.getCharSequence(Notification.EXTRA_TITLE_BIG) as CharSequence;
+					if (bigTitle.length < 40 || extras.get(Notification.EXTRA_TITLE) == null)
+						title = bigTitle.toString();
+					else
+						title = extras.getCharSequence(Notification.EXTRA_TITLE).toString();
+				}
+				else
+					title = extras.getCharSequence(Notification.EXTRA_TITLE).toString();
 
-				if (recentNotifications.size > 100)
-					cleanupRecentNotifications()
+				if (extras.get(Notification.EXTRA_TEXT_LINES) != null)
+				{
+					for (line in extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES))
+					{
+						text += line;
+						text += "\n\n";
+					}
+					text = text.trim();
+				}
+				else
+				{
+					text = extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+				}
 			}
 		}
+
+		val notification =
+			Notification
+				.Builder(context)
+				.setContentTitle(title)
+				.setContentText(text)
+				.setSmallIcon(R.drawable.ic_launcher)
+				.setPriority(Notification.PRIORITY_HIGH)
+				.setContentIntent(ntf.contentIntent)
+				.setAutoCancel(true)
+				.build()
+
+		var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+		notificationManager.notify(++nextNotificationId, notification)
+	}
+
+	private fun update(addedOrRemoved: StatusBarNotification?, added: Boolean)
+	{
+		Lw.d(TAG, "update")
 
 		var notifications: Array<StatusBarNotification>? = null
 
@@ -210,41 +245,31 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 				Lw.d(TAG, "Checking notification" + notification)
 				val packageName = notification.packageName
 
-				if (packageName == Consts.packageName)
-				{
-					Lw.d(TAG, "That's ours, ignoring")
-					continue
-				}
-
 				Lw.d(TAG, "Package name is " + packageName)
 
 				if (packageName in handledPackages)
 				{
 					Lw.d(TAG, "YEP, this is a reminder from the calendar")
+					postNotification(this, notification.getNotification());
 				}
-
 			}
 		}
 		else
 		{
 			Lw.e(TAG, "Can't get list of notifications. WE HAVE NO PERMISSION!! ")
 		}
-
-		if (cntHandledNotifications != 0)
-		{
-		}
 	}
 
 	override fun onNotificationPosted(arg0: StatusBarNotification)
 	{
 		Lw.d(TAG, "Notification posted: " + arg0)
-		update(arg0)
+		update(arg0, true)
 	}
 
 	override fun onNotificationRemoved(arg0: StatusBarNotification)
 	{
 		Lw.d(TAG, "Notification removed: " + arg0)
-		update(arg0)
+		update(arg0, false)
 	}
 
 	companion object
@@ -257,56 +282,6 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		val MSG_NO_PERMISSIONS = 2
 		val MSG_LIST_NOTIFICATIONS = 3
 		val MSG_RELOAD_SETTINGS = 4
-		val MSG_LIST_RECENT_NOTIFICATIONS = 5
 		val MSG_TOGGLE_MUTE = 6
-
-		private val recentNotifications = HashMap<String, Long>()
-
-		private fun cleanupRecentNotifications()
-		{
-			val timeNow = System.currentTimeMillis()
-
-			val listToCleanup = ArrayList<String>()
-
-			for (entry in recentNotifications.entries)
-			{
-				val key = entry.key
-				val value = entry.value
-
-				if (timeNow - value.toLong() > 1000 * 3600 * 24)
-				// older than 1 day
-				{
-					listToCleanup.add(key)
-					recentNotifications.remove(key)
-				}
-			}
-
-			for (key in listToCleanup)
-				recentNotifications.remove(key)
-		}
-
-		fun getRecentNotifications(): Array<String>
-		{
-			Lw.d(TAG, "getRecentNotifications")
-
-			var notifications: Array<String?>? = null
-
-			synchronized (NotificationReceiverService::class.java) {
-				cleanupRecentNotifications()
-
-				notifications = arrayOfNulls<String>(recentNotifications.size)
-
-				var idx = 0
-				for (key in recentNotifications.keys)
-				{
-					notifications!![idx++] = key
-				}
-			}
-
-			return notifications!!
-				.filter {it != null}
-				.map {it!!}
-				.toTypedArray()
-		}
 	}
 }

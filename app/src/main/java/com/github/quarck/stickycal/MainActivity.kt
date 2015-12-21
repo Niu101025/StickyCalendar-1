@@ -154,7 +154,15 @@ class MainActivity : Activity(), ServiceClient.Callback
 		Lw.d(TAG, "onStart()")
 		super.onStart()
 		serviceClient = ServiceClient(this)
-		serviceClient!!.bindService(applicationContext)
+		if (serviceClient != null)
+		{
+			Lw.d(TAG, "binding service")
+			serviceClient!!.bindService(applicationContext)
+		}
+		else
+		{
+			Lw.d(TAG, "onStart(): failed to create ServiceClient()")
+		}
 	}
 
 	public override fun onStop()
@@ -197,11 +205,6 @@ class MainActivity : Activity(), ServiceClient.Callback
 		{
 			onNoPermissions()
 		}
-	}
-
-	override fun onRecetNotificationsList(recentNotifications: Array<String>)
-	{
-		// TODO Auto-generated method stub
 	}
 
 	companion object

@@ -31,8 +31,8 @@
 	<string name="mute">Mute</string>
 	<string name="app_unmuted">SmartNotify</string>
 	
-	<string name="app_updated">SmartNotify обновлен</string>
-	<string name="reenable_app">Пожалуйста, повторно включите SmartNotify</string>
+	<string name="app_updated">Приложение обновлено</string>
+	<string name="reenable_app">Пожалуйста, повторно включите StickyCal</string>
 	
 	<string name="menutitle_handled_apps">ОБРАБАТЫВАЕМЫЕ ПРИЛОЖЕНИЯ</string>
 	<string name="menutitle_recent_notificatoins">НЕДАВНИЕ УВЕДОМЛЕНИЯ</string>

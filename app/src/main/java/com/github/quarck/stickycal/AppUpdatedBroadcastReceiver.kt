@@ -14,8 +14,18 @@ class AppUpdatedBroadcastReceiver : BroadcastReceiver()
 		val mainActivityIntent = Intent(context, MainActivity::class.java)
 		val pendingMainActivityIntent = PendingIntent.getActivity(context, 0, mainActivityIntent, 0)
 
-		val notification = Notification.Builder(context).setContentTitle(context.getString(R.string.app_updated)).setContentText(context.getString(R.string.reenable_app)).setSmallIcon(R.drawable.ic_launcher).setPriority(Notification.PRIORITY_HIGH).setContentIntent(pendingMainActivityIntent).setAutoCancel(true).build()
+		val notification =
+			Notification
+				.Builder(context)
+				.setContentTitle(context.getString(R.string.app_updated))
+				.setContentText(context.getString(R.string.reenable_app))
+				.setSmallIcon(R.drawable.ic_launcher)
+				.setPriority(Notification.PRIORITY_HIGH)
+				.setContentIntent(pendingMainActivityIntent)
+				.setAutoCancel(true)
+				.build()
 
-		(context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(Consts.notificationIdUpdated, notification) // would update if already exists
+		var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+		notificationManager.notify(Consts.notificationIdUpdated, notification) // would update if already exists
 	}
 }
