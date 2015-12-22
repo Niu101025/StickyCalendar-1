@@ -49,8 +49,6 @@ class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Cal
 	internal interface Callback
 	{
 		fun onNoPermissions()
-
-		fun onNotificationList(notificationList: Array<String>)
 	}
 
 	override fun handleMessage(msg: Message): Boolean
@@ -59,8 +57,6 @@ class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Cal
 
 		when (msg.what)
 		{
-			NotificationReceiverService.MSG_LIST_NOTIFICATIONS ->
-				callback?.onNotificationList(msg.obj as Array<String>)
 			NotificationReceiverService.MSG_NO_PERMISSIONS ->
 				callback?.onNoPermissions()
 		}
@@ -139,24 +135,9 @@ class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Cal
 		}
 	}
 
-	fun getListNotifications()
-	{
-		sendServiceReq(NotificationReceiverService.MSG_LIST_NOTIFICATIONS)
-	}
-
 	fun checkPermissions()
 	{
 		sendServiceReq(NotificationReceiverService.MSG_CHECK_PERMISSIONS)
-	}
-
-	fun forceReloadConfig()
-	{
-		sendServiceReq(NotificationReceiverService.MSG_RELOAD_SETTINGS)
-	}
-
-	fun toggleMute()
-	{
-		sendServiceReq(NotificationReceiverService.MSG_TOGGLE_MUTE)
 	}
 
 	companion object

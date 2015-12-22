@@ -10,7 +10,7 @@
 	<string name="hide_btn">Btn</string>
 	<string name="min">min</string>
 	
-	<string name="notification_service">Sticky Calendar Service:</string>
+	<string name="notification_service">Enable this app:</string>
 
 	<string name="app_icon_content_descr">App Icon</string>
 	
@@ -20,6 +20,8 @@
 	<string name="on">ON</string>
 	<string name="off">OFF</string>
 
-	<string name="middle_text_description">This app needs no UI\nEnable service and enjoy</string>
+	<string name="empty"></string>
+	<string name="middle_text_description">This app needs no UI\nEnable app and enjoy</string>
 
+	<string name="remove_original">Remove original notification</string>
 </resources>

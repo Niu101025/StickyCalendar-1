@@ -64,6 +64,7 @@ class MainActivity : Activity(), ServiceClient.Callback
 
 
 	private var toggleButtonEnableService: ToggleButton? = null
+	private var toggleButtonRemoveOriginal: ToggleButton? = null
 
 	private var saveSettingsOnClickListener: OnClickListener? = null
 
@@ -82,6 +83,10 @@ class MainActivity : Activity(), ServiceClient.Callback
 		setContentView(R.layout.activity_main)
 
 		toggleButtonEnableService = findViewById(R.id.toggleButtonEnableService) as ToggleButton
+		toggleButtonRemoveOriginal = findViewById(R.id.toggleButtonRemoveOriginal) as ToggleButton
+
+		toggleButtonEnableService!!.isChecked = settings!!.isServiceEnabled
+		toggleButtonRemoveOriginal!!.isChecked = settings!!.removeOriginal
 
 		saveSettingsOnClickListener = OnClickListener {
 			Lw.d("saveSettingsOnClickListener.onClick()")
@@ -94,6 +99,7 @@ class MainActivity : Activity(), ServiceClient.Callback
 		}
 
 		toggleButtonEnableService!!.setOnClickListener(saveSettingsOnClickListener)
+		toggleButtonRemoveOriginal!!.setOnClickListener(saveSettingsOnClickListener)
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
@@ -105,10 +111,10 @@ class MainActivity : Activity(), ServiceClient.Callback
 	override fun onOptionsItemSelected(item: MenuItem): Boolean
 	{
 		val id = item.itemId
-		if (id == R.id.action_settings)
+		//if (id == R.id.action_settings)
 		{
-			val intent = Intent(this, SettingsActivity::class.java)
-			startActivity(intent)
+//			val intent = Intent(this, SettingsActivity::class.java)
+//			startActivity(intent)
 		}
 		return super.onOptionsItemSelected(item)
 	}
@@ -139,8 +145,9 @@ class MainActivity : Activity(), ServiceClient.Callback
 	{
 		Lw.d(TAG, "Saving current settings")
 
-		if (serviceClient != null)
-			serviceClient!!.forceReloadConfig()
+		settings!!.isServiceEnabled = toggleButtonEnableService!!.isChecked
+		settings!!.removeOriginal = toggleButtonRemoveOriginal!!.isChecked
+
 	}
 
 	public override fun onStart()
@@ -176,29 +183,6 @@ class MainActivity : Activity(), ServiceClient.Callback
 	{
 		Lw.d(TAG, "onResume")
 		super.onResume()
-	}
-
-	override fun onNotificationList(notifications: Array<String>)
-	{
-		Lw.d(TAG, "OnNotificationList()")
-
-		if (notifications != null)
-		{
-			val sb = StringBuilder()
-
-			if (notifications != null)
-				for (ntf in notifications)
-				{
-					sb.append(ntf)
-					sb.append("\n")
-				}
-
-			Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show()
-		}
-		else
-		{
-			onNoPermissions()
-		}
 	}
 
 	companion object

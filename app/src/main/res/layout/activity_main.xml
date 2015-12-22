@@ -12,23 +12,23 @@
 	    android:id="@+id/textViewLblEnableSvcd"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:layout_alignBaseline="@+id/toggleButtonEnableService"
-	    android:layout_alignBottom="@+id/toggleButtonEnableService"
-	    android:layout_alignParentLeft="true"
-	    android:text="@string/notification_service"
-	    android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:text="@string/notification_service"
+	    android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="26dp"
+        android:layout_below="@+id/textView2"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/toggleButtonEnableService"/>
     
     <ToggleButton
         android:id="@+id/toggleButtonEnableService"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:layout_marginRight="6dp"
         android:textSize="18sp"
         android:textOff="@string/off"
-        android:textOn="@string/on"        
-         >
+        android:textOn="@string/on"
+        android:layout_alignBaseline="@+id/textViewLblEnableSvcd"
+        android:layout_toEndOf="@+id/textView6">
 
     </ToggleButton>
 
@@ -47,8 +47,36 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/middle_text_description"
         android:id="@+id/textView2"
-        android:layout_centerVertical="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/remove_original"
+        android:id="@+id/textView6"
+        android:layout_below="@+id/textViewLblEnableSvcd"
         android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/toggleButtonEnableService"/>
+        android:layout_marginTop="26dp"
+        android:layout_toStartOf="@+id/toggleButtonRemoveOriginal"/>
+
+    <Space
+        android:layout_width="20px"
+        android:layout_height="20px"
+        android:layout_above="@+id/toggleButtonEnableService"
+        android:id="@+id/space"/>
+
+    <ToggleButton
+        android:id="@+id/toggleButtonRemoveOriginal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="6dp"
+        android:textSize="18sp"
+        android:textOff="@string/off"
+        android:textOn="@string/on"
+        android:layout_alignBaseline="@+id/textView6"
+        android:layout_alignParentEnd="true"
+        />
 
 </RelativeLayout>

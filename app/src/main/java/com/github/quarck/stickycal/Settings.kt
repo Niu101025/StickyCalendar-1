@@ -40,9 +40,34 @@ class Settings(ctx: Context)
 
 	private var prefs: SharedPreferences? = null
 
+	var isServiceEnabled: Boolean
+		get() = prefs!!.getBoolean(IS_ENABLED_KEY, false)
+		set(value)
+		{
+			val editor = prefs!!.edit()
+			editor.putBoolean(IS_ENABLED_KEY, value)
+			editor.commit()
+		}
+
+	var removeOriginal: Boolean
+		get() = prefs!!.getBoolean(REMOVE_ORIGINAL_KEY, false)
+		set(value)
+		{
+			val editor = prefs!!.edit()
+			editor.putBoolean(REMOVE_ORIGINAL_KEY, value)
+			editor.commit()
+		}
+
 	init
 	{
 		context = ctx
 		prefs = PreferenceManager.getDefaultSharedPreferences(context)
 	}
+
+	companion object
+	{
+		private val IS_ENABLED_KEY = "pref_key_is_enabled"
+		private val REMOVE_ORIGINAL_KEY = "remove_original"
+	}
+
 }

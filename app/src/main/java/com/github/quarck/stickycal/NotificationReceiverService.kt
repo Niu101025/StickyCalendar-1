@@ -30,24 +30,21 @@ package com.github.quarck.stickycal
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ContentUris
 import android.content.Context
 import java.util.ArrayList
 import java.util.HashMap
 
 import android.content.Intent
-import android.os.Handler
-import android.os.IBinder
-import android.os.Message
-import android.os.Messenger
-import android.os.RemoteException
+import android.net.Uri
+import android.os.*
+import android.provider.CalendarContract
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 
 class NotificationReceiverService : NotificationListenerService(), Handler.Callback
 {
 	private val handledPackages = arrayOf<String>( "com.google.android.calendar", "com.android.calendar" )
-
-	private var alarm: Alarm? = null
 
 	private val messenger = Messenger(Handler(this))
 
@@ -59,18 +56,8 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 		Lw.d(TAG, "handleMessage, msg=" + msg.what)
 
-		when (msg.what)
-		{
-			MSG_CHECK_PERMISSIONS -> ret = handleCheckPermissions(msg)
-
-			MSG_LIST_NOTIFICATIONS -> ret = handleListNotifications(msg)
-
-			MSG_RELOAD_SETTINGS ->
-			{
-				Lw.d(TAG, "Explicit request to reload config")
-				update(null, false)
-			}
-		}
+		if (msg.what == MSG_CHECK_PERMISSIONS)
+			ret = handleCheckPermissions(msg)
 
 		return ret
 	}
@@ -82,32 +69,6 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		{
 			var notifications = activeNotifications
 			Lw.e(TAG, "Got ${notifications.size} notifications during check")
-		}
-		catch (ex: NullPointerException)
-		{
-			Lw.e(TAG, "Got exception, have no permissions!")
-			reply(msg, Message.obtain(null, MSG_NO_PERMISSIONS, 0, 0))
-		}
-
-		return true
-	}
-
-	private fun handleListNotifications(msg: Message): Boolean
-	{
-		Lw.d(TAG, "handleListNotifications")
-		try
-		{
-			val notifications = activeNotifications
-			val `val` = arrayOfNulls<String>(notifications.size())
-
-			var idx = 0
-			for (notification in notifications)
-			{
-				Lw.d(TAG, "Sending info about notification " + notification)
-				`val`[idx++] = notification.packageName
-			}
-
-			reply(msg, Message.obtain(null, MSG_LIST_NOTIFICATIONS, 0, 0, `val`))
 		}
 		catch (ex: NullPointerException)
 		{
@@ -134,18 +95,11 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 	override fun onCreate()
 	{
 		super.onCreate()
-		Lw.d(TAG, "onCreate()")
-
-		Lw.d(TAG, "AlarmReceiver")
-		alarm = Alarm()
-
-		Lw.d(TAG, "Settings")
 		settings = Settings(this)
 	}
 
 	override fun onDestroy()
 	{
-		Lw.d(TAG, "onDestroy (??)")
 		super.onDestroy()
 	}
 
@@ -202,63 +156,122 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		return Pair(title,text)
 	}
 
-	fun postNotification(context: Context, ntf: Notification)
+	fun getIntent(pendingIntent: PendingIntent) : Intent
 	{
-		var (title, text) = getTitleAndText(ntf);
-
-		if (title != null && text != null)
+		try
 		{
-			val nextId = ++ nextNotificationId;
-
-			val notification =
-				Notification
-					.Builder(context)
-					.setContentTitle(title)
-					.setContentText(text)
-					.setSmallIcon(R.drawable.ic_launcher)
-					.setPriority(Notification.PRIORITY_HIGH)
-					.setContentIntent(ntf.contentIntent)
-					.setAutoCancel(true)
-					.build()
-
-			var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-			notificationManager.notify(NOTIFICATION_TAG, nextId, notification)
+			var getIntent = PendingIntent::class.java.getDeclaredMethod("getIntent");
+			return getIntent.invoke(pendingIntent) as Intent;
+		}
+		catch (e: Exception)
+		{
+			throw IllegalStateException(e);
 		}
 	}
 
-	private fun update(notification: StatusBarNotification?, added: Boolean)
+
+	fun postNotification(context: Context, originalNotification: Notification)
 	{
-		Lw.d(TAG, "update")
+		var (title, text) = getTitleAndText(originalNotification);
 
-		if (notification != null)
-		{
-			if (added)
+		if (title == null)
+			title = "Can't retrieve notification title"
+
+		if (text == null)
+			text = ""
+
+		val nextId = ++ nextNotificationId;
+
+		var intent = originalNotification.contentIntent
+		Lw.d(TAG, "intent is ${intent.toString()}");
+
+		val notification =
+			Notification
+				.Builder(context)
+				.setContentTitle(title)
+				.setContentText(text)
+				.setSmallIcon(R.drawable.ic_launcher)
+				.setPriority(Notification.PRIORITY_HIGH)
+				.setContentIntent(originalNotification.contentIntent)
+				.setAutoCancel(true)
+				.build()
+
+		var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+		notificationManager.notify(NOTIFICATION_TAG, nextId, notification)
+
+		if (false)
+
+			try
 			{
-				Lw.d(TAG, "Checking notification" + notification)
-				val packageName = notification.packageName
+				var originalIntent = getIntent(originalNotification.contentIntent)
 
-				Lw.d(TAG, "Package name is " + packageName)
+				Lw.d(TAG, "Got original intent: url=${originalIntent.toUri(Intent.URI_INTENT_SCHEME)}")
 
-				if (packageName in handledPackages)
+				var eventId =
+					originalIntent
+						.toUri(Intent.URI_INTENT_SCHEME)
+						.split(';')
+						.filter { x -> x.contains("l.eventid=") }
+						.first()
+						.split("l.eventid=")
+						.last()
+						.toLong()
+
+				Lw.d(TAG, "Parsed event id ${eventId}")
+
+				var uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
+				var intentRecreated = Intent(Intent.ACTION_VIEW).setData(uri);
+
+				notificationManager.notify(NOTIFICATION_TAG, nextId + 10000, Notification
+					.Builder(context)
+					.setContentTitle(title + " 222")
+					.setContentText(text)
+					.setSmallIcon(R.drawable.ic_launcher)
+					.setPriority(Notification.PRIORITY_HIGH)
+					.setContentIntent(PendingIntent.getActivity(context, 0, intentRecreated, 0))
+					.setAutoCancel(true)
+					.build())
+			}
+			catch (ex: Exception)
+			{
+				Lw.d(TAG, "Failed to get intent")
+			}
+	}
+
+	override fun onNotificationPosted(notification: StatusBarNotification)
+	{
+		if (notification != null && settings!!.isServiceEnabled)
+		{
+			Lw.d(TAG, "Checking notification" + notification)
+			val packageName = notification.packageName
+
+			Lw.d(TAG, "Package name is " + packageName)
+
+			if (packageName in handledPackages)
+			{
+				Lw.d(TAG, "This is a reminder from the calendar, key=${notification.key}")
+
+				postNotification(this, notification.getNotification());
+
+				if (settings!!.removeOriginal)
 				{
-					Lw.d(TAG, "YEP, this is a reminder from the calendar")
-					postNotification(this, notification.getNotification());
-					cancelNotification(notification.key);
-				}
+					cancelNotification(notification.key)
+				};
 			}
 		}
 	}
 
-	override fun onNotificationPosted(arg0: StatusBarNotification)
+	override fun onNotificationRemoved(notification: StatusBarNotification)
 	{
-		Lw.d(TAG, "Notification posted: " + arg0)
-		update(arg0, true)
-	}
-
-	override fun onNotificationRemoved(arg0: StatusBarNotification)
-	{
-		Lw.d(TAG, "Notification removed: " + arg0)
-		update(arg0, false)
+		if (notification != null)
+		{
+			var tag = notification.tag;
+			if (tag != null && tag == NOTIFICATION_TAG)
+			{
+				var id = notification.id;
+				Lw.d(TAG, "Our notification id ${id} was removed")
+			}
+		}
 	}
 
 	companion object
@@ -269,13 +282,9 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 		val MSG_CHECK_PERMISSIONS = 1
 		val MSG_NO_PERMISSIONS = 2
-		val MSG_LIST_NOTIFICATIONS = 3
-		val MSG_RELOAD_SETTINGS = 4
-		val MSG_TOGGLE_MUTE = 6
 
 		val NOTIFICATION_TAG = "com.github.quarck.stickycal.ForwardedNotificationTag"
 
 		var nextNotificationId = Consts.notificationIdDynamicFrom
-
 	}
 }
