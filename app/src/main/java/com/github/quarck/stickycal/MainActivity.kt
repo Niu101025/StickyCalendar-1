@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2014, Sergey Parshin, quarck@gmail.com
+ * Copyright (c) 2015, Sergey Parshin, s.parshin@outlook.com
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -64,9 +64,6 @@ class MainActivity : Activity(), ServiceClient.Callback
 
 
 	private var toggleButtonEnableService: ToggleButton? = null
-	private var listHandledApplications: ListView? = null
-	private var textViewlonelyHere: TextView? = null
-	private var textViewListSmallPrint: TextView? = null
 
 	private var saveSettingsOnClickListener: OnClickListener? = null
 
@@ -85,9 +82,6 @@ class MainActivity : Activity(), ServiceClient.Callback
 		setContentView(R.layout.activity_main)
 
 		toggleButtonEnableService = findViewById(R.id.toggleButtonEnableService) as ToggleButton
-		listHandledApplications = findViewById(R.id.listApplications) as ListView
-		textViewlonelyHere = findViewById(R.id.textViewLonelyHere) as TextView
-		textViewListSmallPrint = findViewById(R.id.textViewLblEnablePerAppSmallprint) as TextView
 
 		saveSettingsOnClickListener = OnClickListener {
 			Lw.d("saveSettingsOnClickListener.onClick()")
