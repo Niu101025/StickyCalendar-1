@@ -157,10 +157,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		return super.onBind(intent)
 	}
 
-	private var nextNotificationId = Consts.notificationIdDynamicFrom
-
-
-	fun postNotification(context: Context, ntf: Notification)
+	fun getTitleAndText(ntf: Notification): Pair<String,String>
 	{
 		var extras = ntf.extras;
 
@@ -202,45 +199,40 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 			}
 		}
 
-		val notification =
-			Notification
-				.Builder(context)
-				.setContentTitle(title)
-				.setContentText(text)
-				.setSmallIcon(R.drawable.ic_launcher)
-				.setPriority(Notification.PRIORITY_HIGH)
-				.setContentIntent(ntf.contentIntent)
-				.setAutoCancel(true)
-				.build()
-
-		var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-		notificationManager.notify(++nextNotificationId, notification)
+		return Pair(title,text)
 	}
 
-	private fun update(addedOrRemoved: StatusBarNotification?, added: Boolean)
+	fun postNotification(context: Context, ntf: Notification)
+	{
+		var (title, text) = getTitleAndText(ntf);
+
+		if (title != null && text != null)
+		{
+			val nextId = ++ nextNotificationId;
+
+			val notification =
+				Notification
+					.Builder(context)
+					.setContentTitle(title)
+					.setContentText(text)
+					.setSmallIcon(R.drawable.ic_launcher)
+					.setPriority(Notification.PRIORITY_HIGH)
+					.setContentIntent(ntf.contentIntent)
+					.setAutoCancel(true)
+					.build()
+
+			var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+			notificationManager.notify(NOTIFICATION_TAG, nextId, notification)
+		}
+	}
+
+	private fun update(notification: StatusBarNotification?, added: Boolean)
 	{
 		Lw.d(TAG, "update")
 
-		var notifications: Array<StatusBarNotification>? = null
-
-		try
+		if (notification != null)
 		{
-			notifications = activeNotifications
-		}
-		catch (ex: NullPointerException)
-		{
-			Lw.e(TAG, "Got exception while obtaining list of notifications, have no permissions!")
-		}
-
-		var cntHandledNotifications = 0
-
-		var minReminderInterval = Integer.MAX_VALUE
-
-		if (notifications != null)
-		{
-			Lw.d(TAG, "Total number of notifications currently active: " + notifications.size())
-
-			for (notification in notifications)
+			if (added)
 			{
 				Lw.d(TAG, "Checking notification" + notification)
 				val packageName = notification.packageName
@@ -251,12 +243,9 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 				{
 					Lw.d(TAG, "YEP, this is a reminder from the calendar")
 					postNotification(this, notification.getNotification());
+					cancelNotification(notification.key);
 				}
 			}
-		}
-		else
-		{
-			Lw.e(TAG, "Can't get list of notifications. WE HAVE NO PERMISSION!! ")
 		}
 	}
 
@@ -283,5 +272,10 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		val MSG_LIST_NOTIFICATIONS = 3
 		val MSG_RELOAD_SETTINGS = 4
 		val MSG_TOGGLE_MUTE = 6
+
+		val NOTIFICATION_TAG = "com.github.quarck.stickycal.ForwardedNotificationTag"
+
+		var nextNotificationId = Consts.notificationIdDynamicFrom
+
 	}
 }
