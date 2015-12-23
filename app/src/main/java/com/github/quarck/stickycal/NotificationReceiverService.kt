@@ -29,18 +29,12 @@ package com.github.quarck.stickycal
 
 import android.app.Notification
 import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.ContentUris
 import android.content.Context
-import java.util.ArrayList
-import java.util.HashMap
-
 import android.content.Intent
-import android.net.Uri
 import android.os.*
-import android.provider.CalendarContract
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import java.util.*
 
 class NotificationReceiverService : NotificationListenerService(), Handler.Callback
 {
@@ -86,7 +80,8 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 	private fun handlePostAllNotifications(msg: Message): Boolean
 	{
-		db!!.postAllNotifications(this);
+		if (db != null)
+			db!!.postAllNotifications(this);
 		return true;
 	}
 
@@ -180,7 +175,8 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		{
 			Lw.d(TAG, "Parsed event id ${eventId}")
 
-			db!!.addNotification(eventId, title, text)
+			if (db != null)
+				db!!.addNotification(eventId, title, text)
 			notificationIdMap[eventId] = nextId;
 		}
 		else
@@ -194,7 +190,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 	override fun onNotificationPosted(notification: StatusBarNotification)
 	{
-		if (notification != null && settings!!.isServiceEnabled)
+		if (notification != null && settings != null && settings!!.isServiceEnabled)
 		{
 			Lw.d(TAG, "Checking notification" + notification)
 			val packageName = notification.packageName
@@ -242,7 +238,8 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 				if (eventId != null)
 				{
 					Lw.d(TAG, "Our notification id ${id}, eventId ${eventId} was removed")
-					db!!.deleteNotification(eventId)
+					if (db != null)
+						db!!.deleteNotification(eventId)
 					notificationIdMap.remove(eventId)
 				}
 			}

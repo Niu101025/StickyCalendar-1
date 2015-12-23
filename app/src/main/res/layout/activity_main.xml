@@ -26,10 +26,46 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="App icon credit: Cornmanthe 3rd"
+        android:text="App icon credit: "
+        android:id="@+id/textViewCreditsLbl"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Cornmanthe 3rd"
         android:id="@+id/textViewCredits"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_toEndOf="@id/textViewCreditsLbl"
+        android:textColor="#1d3bc0"
+        android:clickable="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Created with "
+        android:id="@+id/textViewKotlinLbl"
+        android:layout_above="@id/textViewCreditsLbl"
+        android:layout_marginBottom="6dp"
+        android:layout_alignParentStart="true"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Kotlin Language"
+        android:id="@+id/textViewKotlin"
+        android:layout_above="@id/textViewCreditsLbl"
+        android:layout_toEndOf="@id/textViewKotlinLbl"
+        android:layout_marginBottom="6dp"
+        android:textColor="#1d3bc0"
+        android:clickable="true"/>
+
 
     <TextView
         android:layout_width="wrap_content"
@@ -63,7 +99,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/why_question_mark"
         android:id="@+id/textViewWhy"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/textView6"
         android:layout_alignParentEnd="true"
         android:textColor="#1d3bc0"
         android:clickable="true" />

@@ -27,35 +27,16 @@
 
 package com.github.quarck.stickycal
 
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Comparator
-
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
-import android.content.pm.PackageManager.NameNotFoundException
-import android.graphics.drawable.Drawable
-import android.os.AsyncTask
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.View.OnClickListener
-import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.BaseAdapter
-import android.widget.ImageView
-import android.widget.ListView
-import android.widget.NumberPicker
 import android.widget.TextView
-import android.widget.Toast
 import android.widget.ToggleButton
 
 class MainActivity : Activity(), ServiceClient.Callback
@@ -64,38 +45,7 @@ class MainActivity : Activity(), ServiceClient.Callback
 
 	private var toggleButtonEnableService: ToggleButton? = null
 
-	private var saveSettingsOnClickListener: OnClickListener? = null
-
 	private var settings: Settings? = null
-
-
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
-	// TODO: Min 4.2.2!!!
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -113,19 +63,36 @@ class MainActivity : Activity(), ServiceClient.Callback
 
 		toggleButtonEnableService!!.isChecked = settings!!.isServiceEnabled
 
-		saveSettingsOnClickListener = OnClickListener {
-			Lw.d("saveSettingsOnClickListener.onClick()")
+		toggleButtonEnableService!!.setOnClickListener(
+			OnClickListener {
+				Lw.d("saveSettingsOnClickListener.onClick()")
 
-			saveSettings()
+				saveSettings()
 
-			(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(Consts.notificationIdUpdated)
+				(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+					.cancel(Consts.notificationIdUpdated)
 
-			serviceClient!!.checkPermissions()
-		}
+				serviceClient!!.checkPermissions()
+			}
+		)
 
-		toggleButtonEnableService!!.setOnClickListener(saveSettingsOnClickListener)
+		(findViewById(R.id.textViewWhy) as TextView).setOnClickListener(
+			OnClickListener {
+				showRationale()
+			}
+		)
 
-		(findViewById(R.id.textViewWhy) as TextView).setOnClickListener(OnClickListener { showRationale() })
+		(findViewById(R.id.textViewCredits) as TextView).setOnClickListener(
+			OnClickListener {
+				startActivity(Intent.parseUri(imageCreditUri, 0))
+			}
+		)
+
+		(findViewById(R.id.textViewKotlin) as TextView).setOnClickListener(
+			OnClickListener {
+				startActivity(Intent.parseUri(kotlinUri, 0))
+			}
+		)
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
@@ -149,6 +116,9 @@ class MainActivity : Activity(), ServiceClient.Callback
 	override fun onNoPermissions()
 	{
 		Lw.d(TAG, "onNoPermissions()!!!")
+
+		toggleButtonEnableService!!.isChecked = false
+		settings!!.isServiceEnabled = false
 
 		val builder = AlertDialog.Builder(this)
 		builder
@@ -189,7 +159,9 @@ class MainActivity : Activity(), ServiceClient.Callback
 	{
 		Lw.d(TAG, "onStart()")
 		super.onStart()
+
 		serviceClient = ServiceClient(this)
+
 		if (serviceClient != null)
 		{
 			Lw.d(TAG, "binding service")
@@ -223,5 +195,7 @@ class MainActivity : Activity(), ServiceClient.Callback
 	companion object
 	{
 		private val TAG = "MainActivity"
+		var imageCreditUri = "http://cornmanthe3rd.deviantart.com/"
+		var kotlinUri = "https://kotlinlang.org/"
 	}
 }

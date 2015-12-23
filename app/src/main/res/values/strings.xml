@@ -27,5 +27,5 @@
 
 	<string name="why_question_mark">(Why?)</string>
 
-	<string name="rationale">This is because Google Calendar Notification would only stay for about an hour and then they disappear. Not everyone likes this behavior.</string>
+	<string name="rationale">Why?\nThis is because Google Calendar Notification would only stay for about an hour and then they disappear.\nNot everyone likes this behavior.\n\nHow it works?\nThis app would catch all notifications from Google Calendar and will replace them with identical notifications that would open the same event when clicked</string>
 </resources>
