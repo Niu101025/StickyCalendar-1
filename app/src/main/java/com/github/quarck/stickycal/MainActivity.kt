@@ -68,6 +68,35 @@ class MainActivity : Activity(), ServiceClient.Callback
 
 	private var settings: Settings? = null
 
+
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+	// TODO: Min 4.2.2!!!
+
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState)
@@ -95,6 +124,8 @@ class MainActivity : Activity(), ServiceClient.Callback
 		}
 
 		toggleButtonEnableService!!.setOnClickListener(saveSettingsOnClickListener)
+
+		(findViewById(R.id.textViewWhy) as TextView).setOnClickListener(OnClickListener { showRationale() })
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
@@ -136,13 +167,22 @@ class MainActivity : Activity(), ServiceClient.Callback
 		builder.create().show()
 	}
 
+	private fun showRationale()
+	{
+		val builder = AlertDialog.Builder(this)
+		builder
+			.setMessage(R.string.rationale)
+			.setCancelable(false)
+			.setPositiveButton("OK", {x, y -> })
+		builder.create().show()
+	}
+
 	private fun saveSettings()
 	{
 		Lw.d(TAG, "Saving current settings")
 
 		settings!!.isServiceEnabled = toggleButtonEnableService!!.isChecked
 		settings!!.removeOriginal = true
-
 	}
 
 	public override fun onStart()
