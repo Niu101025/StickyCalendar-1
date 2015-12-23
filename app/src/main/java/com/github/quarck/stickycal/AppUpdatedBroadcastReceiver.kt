@@ -54,5 +54,8 @@ class AppUpdatedBroadcastReceiver : BroadcastReceiver()
 
 		var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 		notificationManager.notify(Consts.notificationIdUpdated, notification) // would update if already exists
+
+		var db = SavedNotifications(context)
+		db!!.postAllNotifications(context)
 	}
 }

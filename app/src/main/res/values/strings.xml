@@ -17,11 +17,15 @@
 	<string name="app_updated">App Updated updated</string>
 	<string name="reenable_app">Please re-enable StickyCal service</string>
 
-	<string name="on">ON</string>
-	<string name="off">OFF</string>
+	<string name="on">Enabled</string>
+	<string name="off">Disabled</string>
 
 	<string name="empty"></string>
-	<string name="middle_text_description">This app needs no UI\nEnable app and enjoy</string>
+	<string name="middle_text_description">This app needs no UI!\n\nSimple enable the app:</string>
 
-	<string name="remove_original">Remove original notification</string>
+	<string name="remove_original">And this app will keep calendar notifications for you until you dismiss them!</string>
+
+	<string name="why_question_mark">(Why?)</string>
+
+	<string name="rationale">This is because Google Calendar Notification would only stay for about an hour and then they disappear. Not everyone likes this behavior.</string>
 </resources>

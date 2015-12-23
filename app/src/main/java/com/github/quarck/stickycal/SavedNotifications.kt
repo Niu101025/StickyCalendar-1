@@ -30,19 +30,24 @@
 
 package com.github.quarck.stickycal
 
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.ContentUris
 import java.util.LinkedList
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.provider.CalendarContract
 
 class SavedNotifications(context: Context)
 	: SQLiteOpenHelper(context, SavedNotifications.DATABASE_NAME, null, SavedNotifications.DATABASE_VERSION)
 {
-
-	data class Notification(var notificationTitle: String, var notificationText: String, var eventId : Long)
+	data class DBNotification(var eventId: Long, var title: String, var text: String)
 
 	private val COLUMNS = arrayOf<String>(KEY_TITLE, KEY_TEXT, KEY_EVENTID)
 
@@ -70,7 +75,7 @@ class SavedNotifications(context: Context)
 		this.onCreate(db)
 	}
 
-	fun addNotification(notification: Notification)
+	fun addNotification(notification: DBNotification)
 	{
 		Lw.d(TAG, "addNotification " + notification.toString())
 
@@ -78,8 +83,8 @@ class SavedNotifications(context: Context)
 
 		val values = ContentValues()
 		values.put(KEY_EVENTID, notification.eventId)
-		values.put(KEY_TITLE, notification.notificationTitle)
-		values.put(KEY_TEXT, notification.notificationText)
+		values.put(KEY_TITLE, notification.title)
+		values.put(KEY_TEXT, notification.text)
 
 		db.insert(TABLE_NAME, // table
 			null, // nullColumnHack
@@ -89,25 +94,30 @@ class SavedNotifications(context: Context)
 		db.close()
 	}
 
-	val notifications: List<Notification>
+	fun addNotification(eventId: Long, title: String, text: String)
+	{
+		addNotification(DBNotification(eventId, title, text))
+	}
+
+	val notifications: List<DBNotification>
 		get()
 		{
-			val packages = LinkedList<Notification>()
+			val packages = LinkedList<DBNotification>()
 
 			val query = "SELECT  * FROM " + TABLE_NAME
 
 			val db = this.writableDatabase
 			val cursor = db.rawQuery(query, null)
 
-			var pkg: Notification? = null
+			var pkg: DBNotification? = null
 			if (cursor.moveToFirst())
 			{
 				do
 				{
-					pkg = Notification(
+					pkg = DBNotification(
+						cursor.getString(0).toLong(),
 						cursor.getString(1),
-						cursor.getString(2),
-						cursor.getString(0).toLong()
+						cursor.getString(2)
 						)
 					packages.add(pkg)
 				} while (cursor.moveToNext())
@@ -118,35 +128,70 @@ class SavedNotifications(context: Context)
 			return packages
 		}
 
-	fun deleteNotification(ntf: Notification)
+	fun deleteNotification(eventId: Long)
 	{
 		val db = this.writableDatabase
 
 		db.delete(TABLE_NAME, // table name
 			KEY_EVENTID + " = ?", // selections
-			arrayOf<String>(ntf.eventId.toString())) // selections args
+			arrayOf<String>(eventId.toString())) // selections args
 
 		db.close()
 
-		Lw.d(TAG, "deleteNotification " + ntf.toString())
+		Lw.d(TAG, "deleteNotification ${eventId}")
+	}
+
+	fun deleteNotification(ntf: DBNotification)
+	{
+		deleteNotification(ntf.eventId)
+	}
+
+	public fun postAllNotifications(ctx: Context)
+	{
+		var notifications = this.notifications
+
+		var notificationManager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+		for (notification in notifications)
+		{
+			if (notification.eventId !in NotificationReceiverService.notificationIdMap)
+			{
+				var nextId = ++ nextId;
+
+				var uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, notification.eventId);
+				var intent = Intent(Intent.ACTION_VIEW).setData(uri);
+
+				notificationManager.notify(
+					"${NotificationReceiverService.NOTIFICATION_TAG};${notification.eventId}",
+					nextId,
+					Notification
+						.Builder(ctx)
+						.setContentTitle(notification.title)
+						.setContentText(notification.text)
+						.setSmallIcon(R.drawable.stat_notify_calendar)
+						.setPriority(Notification.PRIORITY_HIGH)
+						.setContentIntent(PendingIntent.getActivity(ctx, 0, intent, 0))
+						.setAutoCancel(true)
+						.build())
+			}
+		}
 	}
 
 	companion object
 	{
 		private val TAG = "DB"
 
-		val DEFAULT_REMIND_INTERVAL = 5 * 60
-
-		private val DATABASE_VERSION = 5
+		private val DATABASE_VERSION = 1
 
 		private val DATABASE_NAME = "Notifications"
 
 		private val TABLE_NAME = "notification"
 		private val INDEX_NAME = "eventIdidx"
 
-		// private static final String KEY_ID = "id";
+		private val KEY_EVENTID = "eventId"
 		private val KEY_TITLE = "title"
 		private val KEY_TEXT = "text"
-		private val KEY_EVENTID = "eventId"
+
+		private var nextId = 100000000;
 	}
 }

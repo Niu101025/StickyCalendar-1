@@ -62,9 +62,7 @@ class MainActivity : Activity(), ServiceClient.Callback
 {
 	private var serviceClient: ServiceClient? = null
 
-
 	private var toggleButtonEnableService: ToggleButton? = null
-	private var toggleButtonRemoveOriginal: ToggleButton? = null
 
 	private var saveSettingsOnClickListener: OnClickListener? = null
 
@@ -83,10 +81,8 @@ class MainActivity : Activity(), ServiceClient.Callback
 		setContentView(R.layout.activity_main)
 
 		toggleButtonEnableService = findViewById(R.id.toggleButtonEnableService) as ToggleButton
-		toggleButtonRemoveOriginal = findViewById(R.id.toggleButtonRemoveOriginal) as ToggleButton
 
 		toggleButtonEnableService!!.isChecked = settings!!.isServiceEnabled
-		toggleButtonRemoveOriginal!!.isChecked = settings!!.removeOriginal
 
 		saveSettingsOnClickListener = OnClickListener {
 			Lw.d("saveSettingsOnClickListener.onClick()")
@@ -99,7 +95,6 @@ class MainActivity : Activity(), ServiceClient.Callback
 		}
 
 		toggleButtonEnableService!!.setOnClickListener(saveSettingsOnClickListener)
-		toggleButtonRemoveOriginal!!.setOnClickListener(saveSettingsOnClickListener)
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu): Boolean
@@ -146,7 +141,7 @@ class MainActivity : Activity(), ServiceClient.Callback
 		Lw.d(TAG, "Saving current settings")
 
 		settings!!.isServiceEnabled = toggleButtonEnableService!!.isChecked
-		settings!!.removeOriginal = toggleButtonRemoveOriginal!!.isChecked
+		settings!!.removeOriginal = true
 
 	}
 

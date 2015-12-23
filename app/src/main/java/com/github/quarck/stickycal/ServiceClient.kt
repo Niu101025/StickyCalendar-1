@@ -55,13 +55,17 @@ class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Cal
 	{
 		Lw.d(TAG, "handleMessage: " + msg.what)
 
-		when (msg.what)
+		if (callback != null)
 		{
-			NotificationReceiverService.MSG_NO_PERMISSIONS ->
-				callback?.onNoPermissions()
+			when (msg.what)
+			{
+				NotificationReceiverService.MSG_NO_PERMISSIONS ->
+					callback?.onNoPermissions()
+				else ->
+					{}
+			}
 		}
-
-		if (callback == null)
+		else
 			Lw.e(TAG, "No callback attached")
 
 		return true
@@ -139,6 +143,12 @@ class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Cal
 	{
 		sendServiceReq(NotificationReceiverService.MSG_CHECK_PERMISSIONS)
 	}
+
+	fun postAllMissingNotifications()
+	{
+		sendServiceReq(NotificationReceiverService.MSG_POST_ALL_NOTIFICATIONS)
+	}
+
 
 	companion object
 	{

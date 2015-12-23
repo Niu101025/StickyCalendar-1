@@ -8,27 +8,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.github.quarck.stickycal.MainActivity" >
 
-	<TextView
-	    android:id="@+id/textViewLblEnableSvcd"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-        android:text="@string/notification_service"
-	    android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_marginTop="26dp"
-        android:layout_below="@+id/textView2"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/toggleButtonEnableService"/>
-    
     <ToggleButton
         android:id="@+id/toggleButtonEnableService"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="6dp"
+        android:layout_marginTop="6dp"
         android:textSize="18sp"
         android:textOff="@string/off"
         android:textOn="@string/on"
-        android:layout_alignBaseline="@+id/textViewLblEnableSvcd"
-        android:layout_toEndOf="@+id/textView6">
+        android:layout_below="@+id/textView2"
+        android:layout_centerHorizontal="true">
 
     </ToggleButton>
 
@@ -48,18 +38,18 @@
         android:text="@string/middle_text_description"
         android:id="@+id/textView2"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/remove_original"
         android:id="@+id/textView6"
-        android:layout_below="@+id/textViewLblEnableSvcd"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="26dp"
-        android:layout_toStartOf="@+id/toggleButtonRemoveOriginal"/>
+        android:layout_below="@+id/toggleButtonEnableService"
+        android:layout_toEndOf="@+id/space"/>
 
     <Space
         android:layout_width="20px"
@@ -67,16 +57,14 @@
         android:layout_above="@+id/toggleButtonEnableService"
         android:id="@+id/space"/>
 
-    <ToggleButton
-        android:id="@+id/toggleButtonRemoveOriginal"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="6dp"
-        android:textSize="18sp"
-        android:textOff="@string/off"
-        android:textOn="@string/on"
-        android:layout_alignBaseline="@+id/textView6"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/why_question_mark"
+        android:id="@+id/textViewWhy"
+        android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
-        />
+        android:textColor="#1d3bc0"/>
 
 </RelativeLayout>
