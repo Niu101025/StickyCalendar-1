@@ -23,9 +23,19 @@
 	<string name="empty"></string>
 	<string name="middle_text_description">This app needs no UI!\n\nSimple enable the app:</string>
 
-	<string name="remove_original">And this app will keep calendar notifications for you until you dismiss them!</string>
+	<string name="expl_text2">And this app will keep calendar notifications for you until you dismiss them!</string>
+
+	<string name="no_calendar_reminders">Note: new fancy Google Calendar \'Reminders\' are not handled by this app</string>
 
 	<string name="why_question_mark">(Why?)</string>
 
+	<string name="sticky_cal_error_title">Sticky Calendar Error</string>
+
+	<string name="sticky_cal_error">Can\'t receive original event information</string>
+
 	<string name="rationale">Why?\nThis is because Google Calendar Notification would only stay for about an hour and then they disappear.\nNot everyone likes this behavior.\n\nHow it works?\nThis app would catch all notifications from Google Calendar and will replace them with identical notifications that would open the same event when clicked</string>
+
+	<string name="rationale2">Unfortunately format of the notification is different from regular events and they are less documented, at this moment it is safer to don\'t handle them\n(There is need actually - they would stay until marked as \'DONE\')</string>
+
+	<string name="explanationAboutRestart">On some android systems it might require to enable access to notifications again after app was updated. Please click on "Enable" twice (so to disable and enable it back) and app will do all necessary checks to verify if access is required</string>
 </resources>

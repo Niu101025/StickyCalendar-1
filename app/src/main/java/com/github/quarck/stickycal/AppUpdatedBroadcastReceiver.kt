@@ -39,6 +39,8 @@ class AppUpdatedBroadcastReceiver : BroadcastReceiver()
 	override fun onReceive(context: Context, intent: Intent)
 	{
 		val mainActivityIntent = Intent(context, MainActivity::class.java)
+		mainActivityIntent.putExtra(Consts.CONFIG_APP_EXTRA, true)
+
 		val pendingMainActivityIntent = PendingIntent.getActivity(context, 0, mainActivityIntent, 0)
 
 		val notification =
@@ -53,9 +55,8 @@ class AppUpdatedBroadcastReceiver : BroadcastReceiver()
 				.build()
 
 		var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-		notificationManager.notify(Consts.notificationIdUpdated, notification) // would update if already exists
+		notificationManager.notify(Consts.NOTIFICATION_ID_UPDATED, notification) // would update if already exists
 
-		var db = SavedNotifications(context)
-		db!!.postAllNotifications(context)
+		postCachedNotifications(context)
 	}
 }

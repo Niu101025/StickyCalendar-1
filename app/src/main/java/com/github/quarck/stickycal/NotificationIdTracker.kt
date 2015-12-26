@@ -25,7 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 package com.github.quarck.stickycal
 
 import android.content.ContentValues
@@ -34,25 +33,19 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import java.util.*
 
-data class DBNotification(var eventId: Long, var title: String, var text: String)
-
-class SavedNotifications(context: Context)
-	: SQLiteOpenHelper(context, SavedNotifications.DATABASE_NAME, null, SavedNotifications.DATABASE_VERSION)
+class NotificationIdTracker(context: Context)
+: SQLiteOpenHelper(context, NotificationIdTracker.DATABASE_NAME, null, NotificationIdTracker.DATABASE_VERSION)
 {
+	data class Entry(var eventId: Long, var notificationId: Int)
+
 	override fun onCreate(db: SQLiteDatabase)
 	{
 		var CREATE_PKG_TABLE =
-			"CREATE TABLE $TABLE_NAME ( $KEY_EVENTID INTEGER PRIMARY KEY, $KEY_TITLE TEXT, $KEY_TEXT TEXT )"
+			"CREATE TABLE $TABLE_NAME ( $KEY_EVENTID INTEGER PRIMARY KEY, $KEY_NOTIFICATIONID INTEGER )"
 
 		Lw.d(TAG, "Creating DB TABLE using query: " + CREATE_PKG_TABLE)
 
 		db.execSQL(CREATE_PKG_TABLE)
-
-		val CREATE_INDEX = "CREATE UNIQUE INDEX $INDEX_NAME ON $TABLE_NAME ($KEY_EVENTID)"
-
-		Lw.d(TAG, "Creating DB INDEX using query: " + CREATE_INDEX)
-
-		db.execSQL(CREATE_INDEX)
 	}
 
 	override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int)
@@ -62,86 +55,139 @@ class SavedNotifications(context: Context)
 		if (oldVersion != newVersion)
 		{
 			db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME)
-			db.execSQL("DROP INDEX IF EXISTS " + INDEX_NAME)
 			this.onCreate(db)
 		}
 	}
 
-	fun addNotification(notification: DBNotification)
+	private fun addEntry(entry: Entry)
 	{
-		Lw.d(TAG, "addNotification " + notification.toString())
+		Lw.d(TAG, "addEntry " + entry.toString())
 
 		val db = this.writableDatabase
 
 		val values = ContentValues()
-		values.put(KEY_EVENTID, notification.eventId)
-		values.put(KEY_TITLE, notification.title)
-		values.put(KEY_TEXT, notification.text)
+		values.put(KEY_EVENTID, entry.eventId)
+		values.put(KEY_NOTIFICATIONID, entry.notificationId)
 
 		try {
-			db.insert(TABLE_NAME, // table
-				null, // nullColumnHack
-				values) // key/value -> keys = column names/ values = column
-			// values
+			db.insert(TABLE_NAME, null, values)
 		}
 		catch (ex: Exception)
 		{
 			val values = ContentValues()
-			values.put(KEY_TITLE, notification.title)
-			values.put(KEY_TEXT, notification.text)
+			values.put(KEY_NOTIFICATIONID, entry.notificationId)
 
 			db.update(TABLE_NAME, // table
 				values, // column/value
 				KEY_EVENTID + " = ?", // selections
-				arrayOf<String>(notification.eventId.toString())) // selection args
+				arrayOf<String>(entry.eventId.toString())) // selection args
 		}
 
 		db.close()
 	}
 
-	fun updateNotification(notification: DBNotification)
+	private fun getEntryByEventId(eventId: Long): Entry?
 	{
-		val db = this.writableDatabase
+		val db = this.readableDatabase
 
-		val values = ContentValues()
-		values.put(KEY_TITLE, notification.title)
-		values.put(KEY_TEXT, notification.text)
+		Lw.d(TAG, "getNotificationIdForEventId ${eventId}")
 
-		db.update(TABLE_NAME, // table
-			values, // column/value
-			KEY_EVENTID + " = ?", // selections
-			arrayOf<String>(notification.eventId.toString())) // selection args
+		val cursor = db.query(
+			TABLE_NAME, // a. table
+			arrayOf<String>(KEY_EVENTID, KEY_NOTIFICATIONID),
+			" $KEY_EVENTID = ?", // c. selections
+			arrayOf<String>(eventId.toString()), // d. selections args
+			null, // e. group by
+			null, // f. h aving
+			null, // g. order by
+			null) // h. limit
 
-		db.close()
-	}
+		var ret: Entry? = null
 
-	fun addNotification(eventId: Long, title: String, text: String): DBNotification
-	{
-		var ret = DBNotification(eventId, title, text)
-		addNotification(ret)
+		if (cursor != null && cursor.count >= 1)
+		{
+			cursor.moveToFirst()
+
+			ret = Entry(
+				cursor.getString(0).toLong(),
+				cursor.getString(1).toInt()
+			)
+		}
+
+		cursor?.close()
+
 		return ret
 	}
 
-	val notifications: List<DBNotification>
+
+	private fun nextNotificationId(): Int
+	{
+		var ret = 0;
+
+		val db = this.writableDatabase
+
+		Lw.d(TAG, "nextNotificationId")
+
+		val query = "SELECT MAX($KEY_NOTIFICATIONID) FROM " + TABLE_NAME
+
+		val cursor = db.rawQuery(query, null)
+
+		if (cursor.moveToFirst())
+		{
+			try
+			{
+				ret = cursor.getString(0).toInt() + 1
+			}
+			catch (ex: Exception)
+			{
+				ret = 0;
+			}
+
+			cursor.close()
+		}
+
+		if (ret == 0)
+			ret = Consts.NOTIFICATION_ID_DYNAMIC_FROM;
+
+		return ret
+	}
+
+	// Would return existing notification id if it is in the database, otherwise
+	// would create a new one
+	fun getNotificationIdForEventId(eventId: Long) : Int
+	{
+		var entry = getEntryByEventId(eventId)
+
+		if (entry == null)
+		{
+			entry = Entry(eventId, nextNotificationId())
+			addEntry(entry)
+		}
+
+		Lw.d(TAG, "getNotificationIdForEventId: returning ${entry.notificationId} for event ${eventId}")
+
+		return entry.notificationId;
+	}
+
+	val entries: List<Entry>
 		get()
 		{
-			val ret = LinkedList<DBNotification>()
+			val ret = LinkedList<Entry>()
 
-			val query = "SELECT  * FROM " + TABLE_NAME
+			val query = "SELECT * FROM " + TABLE_NAME
 
 			val db = this.writableDatabase
 			val cursor = db.rawQuery(query, null)
 
-			var ntfy: DBNotification? = null
+			var ntfy: Entry? = null
 			if (cursor.moveToFirst())
 			{
 				do
 				{
-					ntfy = DBNotification(
+					ntfy = Entry(
 						cursor.getString(0).toLong(),
-						cursor.getString(1),
-						cursor.getString(2)
-						)
+						cursor.getString(1).toInt()
+					)
 					ret.add(ntfy)
 				} while (cursor.moveToNext())
 
@@ -151,8 +197,10 @@ class SavedNotifications(context: Context)
 			return ret
 		}
 
-	fun deleteNotification(eventId: Long)
+	fun deleteByEventId(eventId: Long)
 	{
+		Lw.d(TAG, "deleteByEventId ${eventId}")
+
 		val db = this.writableDatabase
 
 		db.delete(TABLE_NAME, // table name
@@ -160,13 +208,19 @@ class SavedNotifications(context: Context)
 			arrayOf<String>(eventId.toString())) // selections args
 
 		db.close()
-
-		Lw.d(TAG, "deleteNotification ${eventId}")
 	}
 
-	fun deleteNotification(ntf: DBNotification)
+	fun deleteByNotificationId(notificationId: Int)
 	{
-		deleteNotification(ntf.eventId)
+		Lw.d(TAG, "deleteByNotificationId ${notificationId}")
+
+		val db = this.writableDatabase
+
+		db.delete(TABLE_NAME, // table name
+			KEY_NOTIFICATIONID + " = ?", // selections
+			arrayOf<String>(notificationId.toString())) // selections args
+
+		db.close()
 	}
 
 	companion object
@@ -175,13 +229,11 @@ class SavedNotifications(context: Context)
 
 		private val DATABASE_VERSION = 1
 
-		private val DATABASE_NAME = "Notifications"
+		private val DATABASE_NAME = "NotificationIds"
 
-		private val TABLE_NAME = "notification"
-		private val INDEX_NAME = "eventIdidx"
+		private val TABLE_NAME = "idmap"
 
 		private val KEY_EVENTID = "eventId"
-		private val KEY_TITLE = "title"
-		private val KEY_TEXT = "text"
+		private val KEY_NOTIFICATIONID = "nId"
 	}
 }

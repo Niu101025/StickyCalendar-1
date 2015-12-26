@@ -29,10 +29,13 @@ package com.github.quarck.stickycal
 
 object Consts
 {
-	var packageName = "com.github.quarck.stickycal"
+	var OUR_PACKAGE_NAME = "com.github.quarck.stickycal";
 
-	var notificationIdUpdated = 10
+	var NOTIFICATION_ID_UPDATED = 1;
+	var NOTIFICATION_ID_ERROR = 2;
+	var NOTIFICATION_ID_DYNAMIC_FROM = 3;
 
-	var notificationIdDynamicFrom = 100
+	val NOTIFICATION_TAG = "com.github.quarck.stickycal.ForwardedNotificationTag";
 
+	val CONFIG_APP_EXTRA = "configApplicationExtra"
 }

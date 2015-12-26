@@ -8,8 +8,6 @@ class StartUpBootReceiver : BroadcastReceiver()
 {
 	override fun onReceive(context: Context, intent: Intent)
 	{
-		var db = SavedNotifications(context)
-		if (db != null)
-			db!!.postAllNotifications(context)
+		postCachedNotifications(context)
 	}
 }

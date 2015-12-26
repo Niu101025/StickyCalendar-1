@@ -37,36 +37,22 @@ import android.os.Message
 import android.os.Messenger
 import android.os.RemoteException
 
-class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Callback
+class ServiceClient(val onNoPermissions: ()-> Unit ) : Handler.Callback
 {
-
 	private var mService: Messenger? = null
 
 	private var mIsBound: Boolean = false
 
 	private val mMessenger = Messenger(Handler(this))
 
-	internal interface Callback
-	{
-		fun onNoPermissions()
-	}
-
 	override fun handleMessage(msg: Message): Boolean
 	{
 		Lw.d(TAG, "handleMessage: " + msg.what)
 
-		if (callback != null)
+		when (msg.what)
 		{
-			when (msg.what)
-			{
-				NotificationReceiverService.MSG_NO_PERMISSIONS ->
-					callback?.onNoPermissions()
-				else ->
-					{}
-			}
+			NotificationReceiverService.MSG_NO_PERMISSIONS -> onNoPermissions()
 		}
-		else
-			Lw.e(TAG, "No callback attached")
 
 		return true
 	}
@@ -116,6 +102,7 @@ class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Cal
 	private fun sendServiceReq(code: Int)
 	{
 		Lw.d(TAG, "Sending request $code to the service")
+
 		if (mIsBound)
 		{
 			if (mService != null)
@@ -130,7 +117,6 @@ class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Cal
 				{
 					Lw.e(TAG, "Failed to send req - got exception " + e)
 				}
-
 			}
 		}
 		else
@@ -143,12 +129,6 @@ class ServiceClient(private val callback: ServiceClient.Callback?) : Handler.Cal
 	{
 		sendServiceReq(NotificationReceiverService.MSG_CHECK_PERMISSIONS)
 	}
-
-	fun postAllMissingNotifications()
-	{
-		sendServiceReq(NotificationReceiverService.MSG_POST_ALL_NOTIFICATIONS)
-	}
-
 
 	companion object
 	{

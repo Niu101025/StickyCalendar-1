@@ -82,10 +82,21 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/remove_original"
+        android:text="@string/expl_text2"
         android:id="@+id/textView6"
         android:layout_below="@+id/toggleButtonEnableService"
         android:layout_toEndOf="@+id/space"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/no_calendar_reminders"
+        android:id="@+id/textView7"
+        android:layout_below="@+id/textViewWhy"
+        android:layout_toEndOf="@+id/space"/>
+
 
     <Space
         android:layout_width="20px"
@@ -100,6 +111,17 @@
         android:text="@string/why_question_mark"
         android:id="@+id/textViewWhy"
         android:layout_below="@+id/textView6"
+        android:layout_alignParentEnd="true"
+        android:textColor="#1d3bc0"
+        android:clickable="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/why_question_mark"
+        android:id="@+id/textViewWhy2"
+        android:layout_below="@+id/textView7"
         android:layout_alignParentEnd="true"
         android:textColor="#1d3bc0"
         android:clickable="true" />

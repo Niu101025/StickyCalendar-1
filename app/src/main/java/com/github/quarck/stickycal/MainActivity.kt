@@ -33,19 +33,17 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View.OnClickListener
 import android.widget.TextView
 import android.widget.ToggleButton
 
-class MainActivity : Activity(), ServiceClient.Callback
+class MainActivity : Activity()
 {
 	private var serviceClient: ServiceClient? = null
 
-	private var toggleButtonEnableService: ToggleButton? = null
-
 	private var settings: Settings? = null
+
+	private var toggleButtonEnableService : ToggleButton? = null
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -60,60 +58,37 @@ class MainActivity : Activity(), ServiceClient.Callback
 		setContentView(R.layout.activity_main)
 
 		toggleButtonEnableService = findViewById(R.id.toggleButtonEnableService) as ToggleButton
-
 		toggleButtonEnableService!!.isChecked = settings!!.isServiceEnabled
 
-		toggleButtonEnableService!!.setOnClickListener(
-			OnClickListener {
-				Lw.d("saveSettingsOnClickListener.onClick()")
+		toggleButtonEnableService!!.setOnClickListener(OnClickListener {
+			Lw.d("saveSettingsOnClickListener.onClick()")
 
-				saveSettings()
+			saveSettings()
 
-				(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-					.cancel(Consts.notificationIdUpdated)
+			(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+				.cancel(Consts.NOTIFICATION_ID_UPDATED)
 
-				serviceClient!!.checkPermissions()
-			}
-		)
+			serviceClient!!.checkPermissions()
+		})
 
-		(findViewById(R.id.textViewWhy) as TextView).setOnClickListener(
-			OnClickListener {
-				showRationale()
-			}
-		)
+		(findViewById(R.id.textViewWhy) as TextView).setOnClickListener(	OnClickListener {
+			showRationale(R.string.rationale)
+		})
 
-		(findViewById(R.id.textViewCredits) as TextView).setOnClickListener(
-			OnClickListener {
-				startActivity(Intent.parseUri(imageCreditUri, 0))
-			}
-		)
+		(findViewById(R.id.textViewWhy2) as TextView).setOnClickListener(OnClickListener {
+			showRationale(R.string.rationale2)
+		})
 
-		(findViewById(R.id.textViewKotlin) as TextView).setOnClickListener(
-			OnClickListener {
-				startActivity(Intent.parseUri(kotlinUri, 0))
-			}
-		)
+		(findViewById(R.id.textViewCredits) as TextView).setOnClickListener(OnClickListener {
+			startActivity(Intent.parseUri(imageCreditUri, 0))
+		})
+
+		(findViewById(R.id.textViewKotlin) as TextView).setOnClickListener(OnClickListener {
+			startActivity(Intent.parseUri(kotlinUri, 0))
+		})
 	}
 
-	override fun onCreateOptionsMenu(menu: Menu): Boolean
-	{
-		menuInflater.inflate(R.menu.main, menu)
-		return true
-	}
-
-	override fun onOptionsItemSelected(item: MenuItem): Boolean
-	{
-		val id = item.itemId
-		//if (id == R.id.action_settings)
-		{
-//			val intent = Intent(this, SettingsActivity::class.java)
-//			startActivity(intent)
-		}
-		return super.onOptionsItemSelected(item)
-	}
-
-
-	override fun onNoPermissions()
+	private fun onNoPermissions()
 	{
 		Lw.d(TAG, "onNoPermissions()!!!")
 
@@ -137,11 +112,11 @@ class MainActivity : Activity(), ServiceClient.Callback
 		builder.create().show()
 	}
 
-	private fun showRationale()
+	private fun showRationale(textId: Int)
 	{
 		val builder = AlertDialog.Builder(this)
 		builder
-			.setMessage(R.string.rationale)
+			.setMessage(textId)
 			.setCancelable(false)
 			.setPositiveButton("OK", {x, y -> })
 		builder.create().show()
@@ -160,7 +135,7 @@ class MainActivity : Activity(), ServiceClient.Callback
 		Lw.d(TAG, "onStart()")
 		super.onStart()
 
-		serviceClient = ServiceClient(this)
+		serviceClient = ServiceClient({onNoPermissions()})
 
 		if (serviceClient != null)
 		{
@@ -171,6 +146,8 @@ class MainActivity : Activity(), ServiceClient.Callback
 		{
 			Lw.d(TAG, "onStart(): failed to create ServiceClient()")
 		}
+
+		postCachedNotifications(applicationContext)
 	}
 
 	public override fun onStop()
@@ -189,6 +166,7 @@ class MainActivity : Activity(), ServiceClient.Callback
 	public override fun onResume()
 	{
 		Lw.d(TAG, "onResume")
+
 		super.onResume()
 	}
 

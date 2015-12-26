@@ -48,15 +48,12 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 	override fun handleMessage(msg: Message): Boolean
 	{
+		Lw.d(TAG, "handleMessage, msg=${msg.what}")
+
 		var ret = true
 
-		Lw.d(TAG, "handleMessage, msg=" + msg.what)
-
-		when (msg.what)
-		{
-				MSG_CHECK_PERMISSIONS -> ret = handleCheckPermissions(msg)
-				MSG_POST_ALL_NOTIFICATIONS -> ret = handlePostAllNotifications(msg)
-		}
+		if (msg.what == MSG_CHECK_PERMISSIONS)
+			ret = handleCheckPermissions(msg)
 
 		return ret
 	}
@@ -76,13 +73,6 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		}
 
 		return true
-	}
-
-	private fun handlePostAllNotifications(msg: Message): Boolean
-	{
-		if (db != null)
-			db!!.postAllNotifications(this);
-		return true;
 	}
 
 	private fun reply(msgIn: Message, msgOut: Message)
@@ -118,106 +108,70 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 	}
 
 
-	fun getOurNotificationEventId(notification: StatusBarNotification): Long?
-	{
-		var ret: Long? = null;
-
-		try
-		{
-			var tag = notification.tag;
-			if (tag != null)
-			{
-				ret = tag.split(';').last().toLong()
-			}
-		}
-		catch (ex: Exception)
-		{
-			ret = null
-		}
-		return ret;
-	}
-
-
 	fun processNotification(context: Context, originalNotification: Notification) : Boolean
 	{
+		var canRemoveOriginal = true
+
 		var ret =  true
 
 		var (title, text) = originalNotification.getTitleAndText();
 
 		var eventId = originalNotification.getGooleCalendarEventId()
 
-		var nextId : Int
-
-		if (eventId != null && eventId in notificationIdMap)
+		if (title != "" && eventId != null)
 		{
-			nextId = notificationIdMap[eventId]!!; // we are already displaying this notification -- dont' need to create new notificatoin
+			Lw.d(TAG, "Parsed event: id:${eventId}, title=${title}")
+
+			// Only process if we have full set of data we have to have
+			var dbEntry = db!!.addNotification(eventId, title, text)
+			notificationMgr.postNotification(context, dbEntry, originalNotification.contentIntent)
+		}
+		else if (originalNotification.isGoogleCalendarReminder())
+		{
+			// We can't properly handle Google Calendar Reminder notifications,
+			// and there is no reason for this as well - Calendar Reminders would stay
+			// until dismissed (unlike Events)
+			Lw.d(TAG, "Not handling Reminder notification ${title}")
+			canRemoveOriginal = false;
 		}
 		else
 		{
-			nextId = getNextAvailNotificationId()
+			canRemoveOriginal = false
+
+			val notification =
+				Notification
+					.Builder(context)
+					.setContentTitle(context.getString(R.string.sticky_cal_error_title))
+					.setContentText(context.getString(R.string.sticky_cal_error))
+					.setSmallIcon(R.drawable.stat_notify_calendar)
+					.setPriority(Notification.PRIORITY_HIGH)
+					.setContentIntent(originalNotification.contentIntent)
+					.setAutoCancel(true)
+					.build()
+
+			var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+			notificationManager.notify("${Consts.NOTIFICATION_TAG};${eventId}", Consts.NOTIFICATION_ID_ERROR, notification)
 		}
 
-		val notification =
-			Notification
-				.Builder(context)
-				.setContentTitle(title)
-				.setContentText(text)
-				.setSmallIcon(R.drawable.stat_notify_calendar)
-				.setPriority(Notification.PRIORITY_HIGH)
-				.setContentIntent(originalNotification.contentIntent)
-				.setAutoCancel(true)
-				.build()
-
-		var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-		notificationManager.notify("${NOTIFICATION_TAG};${eventId}", nextId, notification)
-
-		if (eventId != null)
-		{
-			Lw.d(TAG, "Parsed event id ${eventId}")
-
-			if (db != null)
-				db!!.addNotification(eventId, title, text)
-			notificationIdMap[eventId] = nextId;
-		}
-		else
-		{
-			ret = false
-			Lw.e(TAG, "Warning: wasn't able to get event id for notification ${notification}")
-		}
-
-		return ret;
+		return canRemoveOriginal;
 	}
 
 	override fun onNotificationPosted(notification: StatusBarNotification)
 	{
 		if (notification != null && settings != null && settings!!.isServiceEnabled)
 		{
-			Lw.d(TAG, "Checking notification" + notification)
 			val packageName = notification.packageName
-
-			Lw.d(TAG, "Package name is " + packageName)
 
 			if (packageName in handledPackages)
 			{
-				Lw.d(TAG, "This is a reminder from the calendar, key=${notification.key}")
+				Lw.d(TAG, "Event from the calendar, key=${notification.key}")
 
-				processNotification(this, notification.getNotification());
+				var canRemoveOriginal = processNotification(this, notification.getNotification());
 
-				if (settings!!.removeOriginal)
+				if (settings!!.removeOriginal && canRemoveOriginal)
 				{
 					cancelNotification(notification.key)
 				};
-			}
-			else if (packageName == Consts.packageName)
-			{
-				var id = notification.id;
-				var eventId = getOurNotificationEventId(notification)
-
-				if (eventId != null)
-				{
-					notificationIdMap[eventId] = id
-					Lw.d(TAG, "Our notification id ${id}, eventId ${eventId} was added")
-				}
 			}
 		}
 	}
@@ -228,27 +182,24 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		{
 			var tag = notification.tag;
 			var pkg = notification.packageName
-			if (tag != null && pkg != null
-				&& pkg == Consts.packageName
-				&& tag.startsWith(NOTIFICATION_TAG))
+
+			if (tag != null && pkg != null && pkg == Consts.OUR_PACKAGE_NAME
+				&& tag.startsWith(Consts.NOTIFICATION_TAG))
 			{
 				var id = notification.id;
-				var eventId = getOurNotificationEventId(notification)
+				var eventId = notification.getOurNotificationEventId()
 
 				if (eventId != null)
 				{
 					Lw.d(TAG, "Our notification id ${id}, eventId ${eventId} was removed")
 					if (db != null)
+					{
+						notificationMgr.onNotificationRemoved(eventId)
 						db!!.deleteNotification(eventId)
-					notificationIdMap.remove(eventId)
+					}
 				}
 			}
 		}
-	}
-
-	private fun getNextAvailNotificationId(): Int
-	{
-		return ++ nextNotificationId;
 	}
 
 	companion object
@@ -259,12 +210,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 		val MSG_CHECK_PERMISSIONS = 1
 		val MSG_NO_PERMISSIONS = 2
-		var MSG_POST_ALL_NOTIFICATIONS = 3
 
-		val NOTIFICATION_TAG = "com.github.quarck.stickycal.ForwardedNotificationTag"
-
-		var nextNotificationId = Consts.notificationIdDynamicFrom
-
-		var notificationIdMap = HashMap<Long, Int>(); // map from calendar event id to notification id
+		var notificationMgr = NotificationViewManager()
 	}
 }
