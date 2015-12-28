@@ -25,18 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 package com.github.quarck.stickycal
 
-import android.content.Context
+import android.app.IntentService
+import android.content.Intent
 
-fun postCachedNotifications(context: Context)
+class PermissionCheckService: IntentService("PermissionCheckService")
 {
-	var db = SavedNotifications(context)
-	var mgr = NotificationViewManager()
-
-	for (notification in db.notifications)
+	override fun onHandleIntent(intent: Intent?)
 	{
-		mgr.postNotification(context, notification, null)
+		var serviceClient = ServiceClient({ })
+
+		if (serviceClient != null)
+		{
+			serviceClient.bindService(applicationContext)
+			serviceClient.checkPermissionsAndShowNotification()
+			serviceClient.unbindService(applicationContext)
+		}
 	}
 }

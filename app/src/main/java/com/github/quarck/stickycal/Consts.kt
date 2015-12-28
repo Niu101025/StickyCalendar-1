@@ -31,9 +31,10 @@ object Consts
 {
 	var OUR_PACKAGE_NAME = "com.github.quarck.stickycal";
 
-	var NOTIFICATION_ID_UPDATED = 1;
-	var NOTIFICATION_ID_ERROR = 2;
-	var NOTIFICATION_ID_DYNAMIC_FROM = 3;
+	var NOTIFICATION_ID_UPDATED_NEED_PERMISSIONS = 1;
+	var NOTIFICATION_ID_UPDATED = 2;
+	var NOTIFICATION_ID_ERROR = 3;
+	var NOTIFICATION_ID_DYNAMIC_FROM = 4;
 
 	val NOTIFICATION_TAG = "com.github.quarck.stickycal.ForwardedNotificationTag";
 

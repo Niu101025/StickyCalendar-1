@@ -38,24 +38,8 @@ class AppUpdatedBroadcastReceiver : BroadcastReceiver()
 {
 	override fun onReceive(context: Context, intent: Intent)
 	{
-		val mainActivityIntent = Intent(context, MainActivity::class.java)
-		mainActivityIntent.putExtra(Consts.CONFIG_APP_EXTRA, true)
-
-		val pendingMainActivityIntent = PendingIntent.getActivity(context, 0, mainActivityIntent, 0)
-
-		val notification =
-			Notification
-				.Builder(context)
-				.setContentTitle(context.getString(R.string.app_updated))
-				.setContentText(context.getString(R.string.reenable_app))
-				.setSmallIcon(R.drawable.ic_launcher)
-				.setPriority(Notification.PRIORITY_HIGH)
-				.setContentIntent(pendingMainActivityIntent)
-				.setAutoCancel(true)
-				.build()
-
-		var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-		notificationManager.notify(Consts.NOTIFICATION_ID_UPDATED, notification) // would update if already exists
+		var intent = Intent(context, PermissionCheckService::class.java)
+		context.startService(intent);
 
 		postCachedNotifications(context)
 	}

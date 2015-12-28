@@ -130,6 +130,12 @@ class ServiceClient(val onNoPermissions: ()-> Unit ) : Handler.Callback
 		sendServiceReq(NotificationReceiverService.MSG_CHECK_PERMISSIONS)
 	}
 
+	fun checkPermissionsAndShowNotification()
+	{
+		sendServiceReq(NotificationReceiverService.MSG_CHECK_PERMISSIONS_AFTER_UPDATE)
+
+	}
+
 	companion object
 	{
 		private val TAG = "ServiceClient"

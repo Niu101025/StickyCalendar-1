@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.github.quarck.stickycal"
-    android:versionCode="10"
-    android:versionName="1.1.1"
+    android:versionCode="12"
+    android:versionName="1.1.3"
     android:installLocation="internalOnly">
 
 
@@ -34,8 +34,10 @@
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
-        </service> 
-        
+        </service>
+
+        <service android:name="com.github.quarck.stickycal.PermissionCheckService"/>
+
         <receiver android:name=".AppUpdatedBroadcastReceiver">
 			<intent-filter>
 				<action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
@@ -43,14 +45,15 @@
     	</receiver>
 
 	    <receiver android:name=".StartUpBootReceiver"
-              android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+                  android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
+                  android:exported="true"
+                  android:enabled="true">
 		    <intent-filter>
     			<action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-		    </intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
     	</receiver>
 
-
     </application>
-
 </manifest>

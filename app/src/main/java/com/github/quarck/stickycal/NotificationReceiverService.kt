@@ -29,6 +29,7 @@ package com.github.quarck.stickycal
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.*
@@ -54,22 +55,26 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 		if (msg.what == MSG_CHECK_PERMISSIONS)
 			ret = handleCheckPermissions(msg)
+		else if (msg.what == MSG_CHECK_PERMISSIONS_AFTER_UPDATE)
+			ret = handleCheckPermissionsAndNotification(msg)
 
 		return ret
 	}
 
+
 	private fun handleCheckPermissions(msg: Message): Boolean
 	{
-		Lw.d(TAG, "handleCheckPermissions")
-		try
-		{
-			var notifications = activeNotifications
-			Lw.e(TAG, "Got ${notifications.size} notifications during check")
-		}
-		catch (ex: NullPointerException)
-		{
-			Lw.e(TAG, "Got exception, have no permissions!")
+		if (!checkPermissions())
 			reply(msg, Message.obtain(null, MSG_NO_PERMISSIONS, 0, 0))
+
+		return true
+	}
+
+	private fun handleCheckPermissionsAndNotification(msg: Message): Boolean
+	{
+		if (!checkPermissions() && settings!!.isServiceEnabled)
+		{
+			notificationMgr!!.onAccessToNotificationsLost(this)
 		}
 
 		return true
@@ -86,6 +91,25 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 			e.printStackTrace()
 		}
 	}
+
+	private fun checkPermissions(): Boolean
+	{
+		var ret = false
+		Lw.d(TAG, "checkPermissions")
+		try
+		{
+			var notifications = activeNotifications
+			Lw.e(TAG, "Got ${notifications.size} notifications during check")
+			ret = true
+		}
+		catch (ex: NullPointerException)
+		{
+			Lw.e(TAG, "Got exception, have no permissions!")
+		}
+
+		return ret
+	}
+
 
 	override fun onCreate()
 	{
@@ -137,20 +161,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		else
 		{
 			canRemoveOriginal = false
-
-			val notification =
-				Notification
-					.Builder(context)
-					.setContentTitle(context.getString(R.string.sticky_cal_error_title))
-					.setContentText(context.getString(R.string.sticky_cal_error))
-					.setSmallIcon(R.drawable.stat_notify_calendar)
-					.setPriority(Notification.PRIORITY_HIGH)
-					.setContentIntent(originalNotification.contentIntent)
-					.setAutoCancel(true)
-					.build()
-
-			var notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-			notificationManager.notify("${Consts.NOTIFICATION_TAG};${eventId}", Consts.NOTIFICATION_ID_ERROR, notification)
+			notificationMgr!!.onNotificationParseError(this, originalNotification.contentIntent)
 		}
 
 		return canRemoveOriginal;
@@ -210,6 +221,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 		val MSG_CHECK_PERMISSIONS = 1
 		val MSG_NO_PERMISSIONS = 2
+		var MSG_CHECK_PERMISSIONS_AFTER_UPDATE = 3
 
 		var notificationMgr = NotificationViewManager()
 	}
