@@ -39,4 +39,7 @@ object Consts
 	val NOTIFICATION_TAG = "com.github.quarck.stickycal.ForwardedNotificationTag";
 
 	val CONFIG_APP_EXTRA = "configApplicationExtra"
+
+	var INTENT_NOTIFICATION_ID_KEY = "notificationId";
+	var INTENT_EVENT_ID_KEY = "eventId";
 }

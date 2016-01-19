@@ -148,7 +148,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 			// Only process if we have full set of data we have to have
 			var dbEntry = db!!.addNotification(eventId, title, text)
-			notificationMgr.postNotification(context, dbEntry, originalNotification.contentIntent)
+			notificationMgr.postNotification(context, dbEntry, settings!!.showDiscardButton, originalNotification.contentIntent)
 		}
 		else if (originalNotification.isGoogleCalendarReminder())
 		{
@@ -194,7 +194,8 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 			var tag = notification.tag;
 			var pkg = notification.packageName
 
-			if (tag != null && pkg != null && pkg == Consts.OUR_PACKAGE_NAME
+			if (tag != null && pkg != null &&
+				pkg == Consts.OUR_PACKAGE_NAME
 				&& tag.startsWith(Consts.NOTIFICATION_TAG))
 			{
 				var id = notification.id;
@@ -203,11 +204,32 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 				if (eventId != null)
 				{
 					Lw.d(TAG, "Our notification id ${id}, eventId ${eventId} was removed")
+
 					if (db != null)
 					{
-						notificationMgr.onNotificationRemoved(eventId)
-						db!!.deleteNotification(eventId)
+						if (!settings!!.showDiscardButton)
+						{
+							Lw.d(TAG, "Not showing discard button - so simply removing the notification")
+							notificationMgr.onNotificationRemoved(eventId)
+							db!!.deleteNotification(eventId)
+						}
+						else
+						{
+							var dbEntry = db!!.getNotification(eventId)
+							if (dbEntry != null)
+							{
+								Lw.d(TAG, "Discard button is active and DB entry is not null - re-posting notification")
+								notificationMgr.postNotification(this, dbEntry, settings!!.showDiscardButton,
+									notification.notification.contentIntent)
+							}
+							else
+							{
+								Lw.d(TAG, "Discard button is active and DB entry is null - notification was dismissed")
+								notificationMgr.onNotificationRemoved(eventId)
+							}
+						}
 					}
+
 				}
 			}
 		}

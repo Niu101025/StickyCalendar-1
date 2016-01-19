@@ -34,6 +34,16 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.preference.PreferenceManager
 
+fun SharedPreferences?.setBoolean(key: String, value: Boolean)
+{
+	if (this != null)
+	{
+		val editor = this.edit()
+		editor.putBoolean(key, value)
+		editor.commit()
+	}
+}
+
 class Settings(ctx: Context)
 {
 	private var context: Context? = null
@@ -42,21 +52,15 @@ class Settings(ctx: Context)
 
 	var isServiceEnabled: Boolean
 		get() = prefs!!.getBoolean(IS_ENABLED_KEY, false)
-		set(value)
-		{
-			val editor = prefs!!.edit()
-			editor.putBoolean(IS_ENABLED_KEY, value)
-			editor.commit()
-		}
+		set(value) = prefs.setBoolean(IS_ENABLED_KEY, value)
 
 	var removeOriginal: Boolean
 		get() = prefs!!.getBoolean(REMOVE_ORIGINAL_KEY, false)
-		set(value)
-		{
-			val editor = prefs!!.edit()
-			editor.putBoolean(REMOVE_ORIGINAL_KEY, value)
-			editor.commit()
-		}
+		set(value) = prefs.setBoolean(REMOVE_ORIGINAL_KEY, value)
+
+	var showDiscardButton: Boolean
+		get() = prefs!!.getBoolean(IS_DISCARD_ENABLED_KEY, false)
+		set(value) = prefs.setBoolean(IS_DISCARD_ENABLED_KEY, value)
 
 	init
 	{
@@ -68,6 +72,7 @@ class Settings(ctx: Context)
 	{
 		private val IS_ENABLED_KEY = "pref_key_is_enabled"
 		private val REMOVE_ORIGINAL_KEY = "remove_original"
+		private val IS_DISCARD_ENABLED_KEY = "pref_key_enable_discard_button"
 	}
 
 }

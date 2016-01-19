@@ -34,9 +34,10 @@ fun postCachedNotifications(context: Context)
 {
 	var db = SavedNotifications(context)
 	var mgr = NotificationViewManager()
+	var settings = Settings(context)
 
 	for (notification in db.notifications)
 	{
-		mgr.postNotification(context, notification, null)
+		mgr.postNotification(context, notification, settings!!.showDiscardButton, null)
 	}
 }

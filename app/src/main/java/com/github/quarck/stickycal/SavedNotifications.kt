@@ -79,13 +79,15 @@ class SavedNotifications(context: Context)
 		values.put(KEY_TEXT, notification.text)
 
 		try {
-			db.insert(TABLE_NAME, // table
+			db.insertOrThrow(TABLE_NAME, // table
 				null, // nullColumnHack
 				values) // key/value -> keys = column names/ values = column
 			// values
 		}
-		catch (ex: Exception)
+		catch (ex: android.database.sqlite.SQLiteConstraintException)
 		{
+			Lw.d(TAG, "This entry (${notification.eventId}) is already in the DB, updating!")
+
 			val values = ContentValues()
 			values.put(KEY_TITLE, notification.title)
 			values.put(KEY_TEXT, notification.text)
@@ -122,6 +124,32 @@ class SavedNotifications(context: Context)
 		return ret
 	}
 
+	fun getNotification(eventId: Long): DBNotification?
+	{
+		val db = this.readableDatabase
+
+		val cursor = db.query(TABLE_NAME, // a. table
+			COLUMNS, // b. column names
+			" $KEY_EVENTID = ?", // c. selections
+			arrayOf<String>(eventId.toString()), // d. selections args
+			null, // e. group by
+			null, // f. h aving
+			null, // g. order by
+			null) // h. limit
+
+		var notification: DBNotification? = null
+
+		if (cursor != null && cursor.count >= 1)
+		{
+			cursor.moveToFirst()
+			notification = DBNotification(cursor.getString(0).toLong(), cursor.getString(1), cursor.getString(2))
+		}
+
+		cursor?.close()
+
+		return notification
+	}
+
 	val notifications: List<DBNotification>
 		get()
 		{
@@ -129,7 +157,7 @@ class SavedNotifications(context: Context)
 
 			val query = "SELECT  * FROM " + TABLE_NAME
 
-			val db = this.writableDatabase
+			val db = this.readableDatabase
 			val cursor = db.rawQuery(query, null)
 
 			var ntfy: DBNotification? = null
@@ -183,5 +211,8 @@ class SavedNotifications(context: Context)
 		private val KEY_EVENTID = "eventId"
 		private val KEY_TITLE = "title"
 		private val KEY_TEXT = "text"
+
+
+		private val COLUMNS = arrayOf<String>(KEY_EVENTID, KEY_TITLE, KEY_TEXT)
 	}
 }

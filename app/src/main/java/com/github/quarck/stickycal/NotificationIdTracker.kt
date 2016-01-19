@@ -59,6 +59,19 @@ class NotificationIdTracker(context: Context)
 		}
 	}
 
+	fun dropAll()
+	{
+		Lw.d(TAG, "dropAll")
+
+		val db = this.writableDatabase
+
+		db.delete(TABLE_NAME, // table name
+			null, // selections
+			null) // selections args
+
+		db.close()
+	}
+
 	private fun addEntry(entry: Entry)
 	{
 		Lw.d(TAG, "addEntry " + entry.toString())
@@ -70,7 +83,7 @@ class NotificationIdTracker(context: Context)
 		values.put(KEY_NOTIFICATIONID, entry.notificationId)
 
 		try {
-			db.insert(TABLE_NAME, null, values)
+			db.insertOrThrow(TABLE_NAME, null, values)
 		}
 		catch (ex: Exception)
 		{

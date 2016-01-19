@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015, Sergey Parshin, s.parshin@outlook.com
+ * Copyright (c) 2014, Sergey Parshin, quarck@gmail.com
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of developer (Sergey Parshin) nor the
  *       names of other project contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,18 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 package com.github.quarck.stickycal
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.os.Bundle
+import android.preference.PreferenceActivity
 
-class StartUpBootReceiver : BroadcastReceiver()
+class SettingsActivity : PreferenceActivity()
 {
-	override fun onReceive(context: Context, intent: Intent)
+	@SuppressWarnings("deprecation")
+	public override fun onCreate(savedInstanceState: Bundle?)
 	{
-		NotificationIdTracker(context).dropAll()
-		postCachedNotifications(context)
+		super.onCreate(savedInstanceState)
+		addPreferencesFromResource(R.xml.preferences)
 	}
 }

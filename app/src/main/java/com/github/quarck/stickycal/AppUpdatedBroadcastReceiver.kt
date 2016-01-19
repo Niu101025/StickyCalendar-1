@@ -41,6 +41,7 @@ class AppUpdatedBroadcastReceiver : BroadcastReceiver()
 		var intent = Intent(context, PermissionCheckService::class.java)
 		context.startService(intent);
 
+		NotificationIdTracker(context).dropAll()
 		postCachedNotifications(context)
 	}
 }

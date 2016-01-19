@@ -34,11 +34,12 @@ import android.app.PendingIntent
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.provider.CalendarContract
 
 class NotificationViewManager
 {
-	public fun postNotification(ctx: Context, notification: DBNotification, pendingIntent: PendingIntent?)
+	public fun postNotification(ctx: Context, notification: DBNotification, showDiscard: Boolean, pendingIntent: PendingIntent?)
 	{
 		synchronized(NotificationManager::class.java)
 		{
@@ -57,20 +58,36 @@ class NotificationViewManager
 			var intent = Intent(Intent.ACTION_VIEW).setData(uri);
 			pIndent = PendingIntent.getActivity(ctx, 0, intent, 0)
 		}
-			// We can't properly handle Google Calendar Reminder notifications,
+
+		var builder = Notification
+			.Builder(ctx)
+			.setContentTitle(notification.title)
+			.setContentText(notification.text)
+			.setSmallIcon(R.drawable.stat_notify_calendar)
+			.setPriority(Notification.PRIORITY_HIGH)
+			.setContentIntent(pIndent)
+			.setAutoCancel(!showDiscard)
+
+		if (showDiscard)
+		{
+			var discardIntent = Intent(ctx, DiscardNotificationService::class.java)
+			discardIntent.putExtra(Consts.INTENT_NOTIFICATION_ID_KEY, nextId);
+			discardIntent.putExtra(Consts.INTENT_EVENT_ID_KEY, notification.eventId);
+			var pDiscardIndent = PendingIntent.getService(ctx, 0, discardIntent, 0)
+
+			builder = builder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Discard", pDiscardIndent)
+		}
+
+		var newNotification = builder.build()
 
 		notificationManager.notify(
-			"${Consts.NOTIFICATION_TAG};${notification.eventId}",
-			nextId,
-			Notification
-				.Builder(ctx)
-				.setContentTitle(notification.title)
-				.setContentText(notification.text)
-				.setSmallIcon(R.drawable.stat_notify_calendar)
-				.setPriority(Notification.PRIORITY_HIGH)
-				.setContentIntent(pIndent)
-				.setAutoCancel(true)
-				.build())
+			"${Consts.NOTIFICATION_TAG};${notification.eventId}", nextId, builder.build())
+	}
+
+	fun removeNotification(ctx: Context, eventId: Long, notificationId: Int)
+	{
+		var notificationManager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+		notificationManager.cancel("${Consts.NOTIFICATION_TAG};${eventId}", notificationId);
 	}
 
 	public fun onNotificationRemoved(eventId: Long)
@@ -122,4 +139,5 @@ class NotificationViewManager
 	{
 		private var tracker: NotificationIdTracker? = null
 	}
+
 }
