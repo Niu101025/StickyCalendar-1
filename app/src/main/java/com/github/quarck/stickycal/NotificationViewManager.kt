@@ -73,7 +73,9 @@ class NotificationViewManager
 			var discardIntent = Intent(ctx, DiscardNotificationService::class.java)
 			discardIntent.putExtra(Consts.INTENT_NOTIFICATION_ID_KEY, nextId);
 			discardIntent.putExtra(Consts.INTENT_EVENT_ID_KEY, notification.eventId);
-			var pDiscardIndent = PendingIntent.getService(ctx, 0, discardIntent, 0)
+			var pDiscardIndent = PendingIntent.getService(ctx, nextId, discardIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+
+			Lw.d("NotificationViewManager: adding pending intent for discard, event id ${notification.eventId}, notificationId ${nextId}")
 
 			builder = builder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Discard", pDiscardIndent)
 		}

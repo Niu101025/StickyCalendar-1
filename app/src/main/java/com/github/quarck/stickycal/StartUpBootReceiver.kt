@@ -36,7 +36,7 @@ class StartUpBootReceiver : BroadcastReceiver()
 {
 	override fun onReceive(context: Context, intent: Intent)
 	{
-		NotificationIdTracker(context).dropAll()
+		NotificationIdTracker(context).cleanupOnStartup()
 		postCachedNotifications(context)
 	}
 }

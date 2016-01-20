@@ -59,9 +59,9 @@ class NotificationIdTracker(context: Context)
 		}
 	}
 
-	fun dropAll()
+	fun cleanupOnStartup()
 	{
-		Lw.d(TAG, "dropAll")
+/*		Lw.d(TAG, "dropAll")
 
 		val db = this.writableDatabase
 
@@ -69,7 +69,7 @@ class NotificationIdTracker(context: Context)
 			null, // selections
 			null) // selections args
 
-		db.close()
+		db.close() */
 	}
 
 	private fun addEntry(entry: Entry)

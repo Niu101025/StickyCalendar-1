@@ -98,7 +98,7 @@ class MainActivity : Activity()
 	{
 		var db = SavedNotifications(this)
 
-		var dbNotification = db.addNotification(12345678, "Test Notification", "This is a test notificaiton")
+		var dbNotification = db.addNotification(232323232, "Test Notification", "This is a test notificaiton")
 
 		NotificationViewManager().postNotification(
 			this,
