@@ -31,6 +31,8 @@ object Consts
 {
 	var OUR_PACKAGE_NAME = "com.github.quarck.stickycal";
 
+	val WAKE_LOCK_NAME = "StickyCalDelayedNotificationCancel"
+
 	var NOTIFICATION_ID_UPDATED_NEED_PERMISSIONS = 1;
 	var NOTIFICATION_ID_UPDATED = 2;
 	var NOTIFICATION_ID_ERROR = 3;

@@ -1,13 +1,32 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory 
-        android:title="Settings"
+        android:title="@string/settings"
         android:key="pref_key_silence">\
         
         <CheckBoxPreference
             android:key="pref_key_enable_discard_button"
-            android:summary="By selecting this value the 'Discard' action will be displayed with each notification, notification would re-appear unless it is discarded using 'Discard' button"
-            android:title="Show 'Discard' button"
+            android:summary="@string/show_discard_summary"
+            android:title="@string/show_discard_button"
             android:defaultValue="false"  />
+
+        <CheckBoxPreference
+            android:key="delay_notification_removal"
+            android:summary="@string/delay_notification_summary"
+            android:title="@string/delay_notification_removal"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="play_reminder_sound"
+            android:summary="@string/play_reminder_sound_summary"
+            android:title="@string/play_reminder_sound"
+            android:defaultValue="false" />
+
+        <RingtonePreference
+            android:key="pref_key_ringtone"
+            android:summary="@string/ringtone_selection_summary"
+            android:title="@string/ringtone_selection"
+            android:ringtoneType="notification" />
+
     </PreferenceCategory>
 
     <!--

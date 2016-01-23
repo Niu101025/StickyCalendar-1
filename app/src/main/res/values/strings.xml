@@ -2,20 +2,13 @@
 <resources>
 
     <string name="app_name">Sticky Calendar</string>
-    <string name="action_settings">Settings</string>
+    <string name="settings">Settings</string>
 	<string name="application_has_no_access">This application needs special permissions to be able to access calendar notifications. Open Settings app to grant such access?</string>
+
 	<string name="open_settings">Open Settings</string>
-	<string name="cancel_quit">Cancel(Quit)</string>
+	<string name="cancel">Cancel</string>
 
-	<string name="hide_btn">Btn</string>
-	<string name="min">min</string>
-	
-	<string name="notification_service">Enable this app:</string>
-
-	<string name="app_icon_content_descr">App Icon</string>
-	
-	<string name="app_updated">App Updated updated</string>
-
+	<!-- string name="app_updated">App Updated</string -->
 	<string name="on">Enabled</string>
 	<string name="off">Disabled</string>
 
@@ -28,6 +21,8 @@
 
 	<string name="why_question_mark">(Why?)</string>
 
+	<string name="why2_question_mark">(Why?)</string>
+
 	<string name="sticky_cal_error_title">Sticky Calendar Error</string>
 
 	<string name="sticky_cal_error">Can\'t receive original event information</string>
@@ -36,9 +31,23 @@
 
 	<string name="rationale2">Why?\nUnfortunately format of the notification is different from regular events and they are less documented\nAt this moment it is safer to don\'t handle them\n\nThere is no need actually - they would stay until marked as \'DONE\'</string>
 
-	<string name="explanationAboutRestart">On some android systems it might require to enable access to notifications again after app was updated. Please click on "Enable" twice (so to disable and enable it back) and app will do all necessary checks to verify if access is required</string>
+	<!-- string name="explanationAboutRestart">On some android systems it might require to enable access to notifications again after app was updated. Please click on "Enable" twice (so to disable and enable it back) and app will do all necessary checks to verify if access is required</string -->
+
+	<string name="discard">DISCARD</string>
 
 	<string name="access_lost">Access to notifications lost</string>
 	<string name="reenable_app">Please re-enable access to notifications to enable functionality of the app</string>
+
+	<string name="show_discard_button">Show \'DISCARD\' button</string>
+	<string name="show_discard_summary">The \'DISCARD\' action will be displayed with each notification, notification would re-appear unless it is discarded using this button</string>
+
+	<string name="delay_notification_removal">Delay notification removal</string>
+	<string name="delay_notification_summary">Original Google Calendar notification would stay for 3 seconds before it is removed, so it could play sound</string>
+
+	<string name="play_reminder_sound">Play own reminder sound</string>
+	<string name="play_reminder_sound_summary">Alternative solution to issues with original notification sound - you could make this app to play audio reminder on event</string>
+
+	<string name="ringtone_selection">Notification Ringtone</string>
+	<string name="ringtone_selection_summary">Choose ringtone for notification</string>
 
 </resources>

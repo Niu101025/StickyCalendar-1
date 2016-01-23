@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Sticky Calendar</string>
+    <string name="settings">Настройки</string>
+	<string name="application_has_no_access">Данному приложению требуется доступ к API уведомлений для доступа к уведомлениям календаря. Пожалуйста откройте приложение Настройки и предоставьте доступ.</string>
+
+	<string name="open_settings">Открыть настройки</string>
+	<string name="cancel">Отмена</string>
+
+	<!-- string name="app_updated">App Updated</string -->
+	<string name="on">Включено</string>
+	<string name="off">Выключено</string>
+
+	<string name="empty"></string>
+	<string name="middle_text_description">Данному приложению не нужен интерфейс!\nПросто включите его:</string>
+
+	<string name="expl_text2">И приложение закрепит уведомления календаря до тех пор пока они вручную не будут удалены!</string>
+
+	<string name="no_calendar_reminders">Внимание: \'Уведомления\' Google Календаря не обрабатываются этим приложением</string>
+
+	<string name="why_question_mark">(Зачем?)</string>
+
+	<string name="why2_question_mark">(Почему?)</string>
+
+	<string name="sticky_cal_error_title">Sticky Calendar - Ошибка</string>
+
+	<string name="sticky_cal_error">Не удается извлечь информацию о событии календаря</string>
+
+	<string name="rationale">Почему?\nПотому что уведомления о событиях от Google Календаря будут висеть в панели уведомлений только в течении часа (примерно) после чего они бесследно изчезают.\nНе всем по душе данное поведение.\n\nКак это работает?\n
+		Данное приложение будет перехватывать все уведомления о событиях от Google Календаря и будет заменять их на собственные идентично выглядящие уведомления, по нажатию на которые будет открываться то-же событие в Google Календаре</string>
+
+	<string name="rationale2">Почему?\nК сожалению формат уведомлений о напоминаниях отличается от обычных событий и они куда менее документированы.\nВ данный момент будет безопаснее не трогать уведомления о напоминаниях\n\nВ действительности в этом нет нужды - "напоминания" не изчезают сами, в отличии от "событий"</string>
+
+	<!-- string name="explanationAboutRestart">На некоторых устройствах требуется повторно предоставить доступ к API уведомлений после обновления приложения,  Please click on "Enable" twice (so to disable and enable it back) and app will do all necessary checks to verify if access is required</string -->
+
+	<string name="discard">УБРАТЬ</string>
+
+	<string name="access_lost">Доступ к API уведомлений потерян</string>
+	<string name="reenable_app">Пожалуйста повторно включите доступ к уведомлениям для продолжения корректной работы приложения</string>
+
+	<string name="show_discard_button">Кнопка \'УБРАТЬ\'</string>
+	<string name="show_discard_summary">Кнопка \'УБРАТЬ\' будет отображаться на каждом уведомлении, уведомления будут "возвращаться" если они были удалены как-то иначе чем этой кнопкой</string>
+
+	<string name="delay_notification_removal">Отложить замену</string>
+	<string name="delay_notification_summary">Оригинальное уведомление от Google Календаря будет удалено с 3х секундной задержкой, таким образом уведомление успеет проиграть звук</string>
+
+	<string name="play_reminder_sound">Свой звук уведомления</string>
+	<string name="play_reminder_sound_summary">Альтернативное решение проблем со звуком - играть собственное звуковое уведомление</string>
+
+	<string name="ringtone_selection">Звук уведомления</string>
+	<string name="ringtone_selection_summary">Выберете звук для уведомлений</string>
+
+
+</resources>

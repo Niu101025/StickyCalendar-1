@@ -148,7 +148,8 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 			// Only process if we have full set of data we have to have
 			var dbEntry = db!!.addNotification(eventId, title, text)
-			notificationMgr.postNotification(context, dbEntry, settings!!.showDiscardButton, originalNotification.contentIntent)
+			notificationMgr.postNotification(context, dbEntry, settings!!.showDiscardButton,
+				settings!!.ringtoneURI, originalNotification.contentIntent)
 		}
 		else if (originalNotification.isGoogleCalendarReminder())
 		{
@@ -179,9 +180,9 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 				var canRemoveOriginal = processNotification(this, notification.getNotification());
 
-				if (settings!!.removeOriginal && canRemoveOriginal)
+				if (settings!!.removeOriginal && canRemoveOriginal && notification.key != null)
 				{
-					cancelNotification(notification.key)
+					processCancelNotification(notification.key)
 				};
 			}
 		}
@@ -219,7 +220,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 							if (dbEntry != null)
 							{
 								Lw.d(TAG, "Discard button is active and DB entry is not null - re-posting notification")
-								notificationMgr.postNotification(this, dbEntry, settings!!.showDiscardButton,
+								notificationMgr.postNotification(this, dbEntry, settings!!.showDiscardButton, null,
 									notification.notification.contentIntent)
 							}
 							else
@@ -231,6 +232,34 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 					}
 
 				}
+			}
+		}
+	}
+
+	private fun processCancelNotification(key: String?)
+	{
+		if (!settings!!.delayNotificationRemoval)
+		{
+			cancelNotification(key)
+		}
+		else
+		{
+			var powerManager = getSystemService(POWER_SERVICE) as PowerManager
+
+			var wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Consts.WAKE_LOCK_NAME);
+			if (wakeLock != null)
+			{
+				wakeLock.acquire();
+
+				Handler().postDelayed({
+					cancelNotification(key)
+					wakeLock.release()
+				}, 3000)
+			}
+			else
+			{
+				// fialback
+				cancelNotification(key)
 			}
 		}
 	}

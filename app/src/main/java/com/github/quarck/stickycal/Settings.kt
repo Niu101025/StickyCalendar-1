@@ -62,6 +62,42 @@ class Settings(ctx: Context)
 		get() = prefs!!.getBoolean(IS_DISCARD_ENABLED_KEY, false)
 		set(value) = prefs.setBoolean(IS_DISCARD_ENABLED_KEY, value)
 
+	var delayNotificationRemoval: Boolean
+		get() = prefs!!.getBoolean(DELAY_NOTIFICATION_REMOVAL_KEY, false)
+		set(value) = prefs.setBoolean(DELAY_NOTIFICATION_REMOVAL_KEY, value)
+
+	var playReminderSound: Boolean
+		get() = prefs!!.getBoolean(PLAY_REMINDER_SOUND_KEY, false)
+		set(value) = prefs.setBoolean(PLAY_REMINDER_SOUND_KEY, value)
+
+	val ringtoneURI: Uri?
+		get()
+		{
+			var notification: Uri? = null
+
+			if (playReminderSound)
+			{
+				try
+				{
+					val uriValue = prefs!!.getString(RINGTONE_KEY, "")
+
+					if (uriValue != null && !uriValue.isEmpty())
+						notification = Uri.parse(uriValue)
+				}
+				catch (e: Exception)
+				{
+					e.printStackTrace()
+				}
+				finally
+				{
+					if (notification == null)
+						notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+				}
+			}
+
+			return notification
+		}
+
 	init
 	{
 		context = ctx
@@ -73,6 +109,10 @@ class Settings(ctx: Context)
 		private val IS_ENABLED_KEY = "pref_key_is_enabled"
 		private val REMOVE_ORIGINAL_KEY = "remove_original"
 		private val IS_DISCARD_ENABLED_KEY = "pref_key_enable_discard_button"
+		private val DELAY_NOTIFICATION_REMOVAL_KEY = "delay_notification_removal"
+
+		private val PLAY_REMINDER_SOUND_KEY = "play_reminder_sound"
+		private val RINGTONE_KEY = "pref_key_ringtone"
 	}
 
 }

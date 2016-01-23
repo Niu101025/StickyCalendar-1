@@ -36,6 +36,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
 import android.widget.TextView
@@ -63,38 +64,29 @@ class MainActivity : Activity()
 
 		toggleButtonEnableService = findViewById(R.id.toggleButtonEnableService) as ToggleButton
 		toggleButtonEnableService!!.isChecked = settings!!.isServiceEnabled
-
-		toggleButtonEnableService!!.setOnClickListener(OnClickListener {
-			Lw.d("saveSettingsOnClickListener.onClick()")
-
-			saveSettings()
-
-			(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-				.cancel(Consts.NOTIFICATION_ID_UPDATED)
-
-			serviceClient!!.checkPermissions()
-		})
-
-		(findViewById(R.id.textViewWhy) as TextView).setOnClickListener(	OnClickListener {
-			showRationale(R.string.rationale)
-		})
-
-		(findViewById(R.id.textViewWhy2) as TextView).setOnClickListener(OnClickListener {
-			showRationale(R.string.rationale2)
-		})
-
-		(findViewById(R.id.textViewCredits) as TextView).setOnClickListener(OnClickListener {
-			startActivity(Intent.parseUri(imageCreditUri, 0))
-		})
-
-		(findViewById(R.id.textViewKotlin) as TextView).setOnClickListener(OnClickListener {
-			startActivity(Intent.parseUri(kotlinUri, 0))
-		})
-
-		((findViewById(R.id.buttonTest) as Button)).setOnClickListener(OnClickListener {postTestNotification()})
 	}
 
-	private fun postTestNotification()
+	public fun OnBtnEnableServiceClick(v: View)
+	{
+		Lw.d("saveSettingsOnClickListener.onClick()")
+
+		saveSettings()
+
+		(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+			.cancel(Consts.NOTIFICATION_ID_UPDATED)
+
+		serviceClient!!.checkPermissions()
+	}
+
+	public fun OnTextViewWhyClick(v: View) = showRationale(R.string.rationale)
+
+	public fun OnTextViewWhy2Click(v: View) = showRationale(R.string.rationale2)
+
+	public fun OnTextViewCreditsClick(v: View) = startActivity(Intent.parseUri(imageCreditUri, 0))
+
+	public fun OnTextViewKotlinClick(v: View) = startActivity(Intent.parseUri(kotlinUri, 0))
+
+	public fun OnButtonTestClick(v: View)
 	{
 		var db = SavedNotifications(this)
 
@@ -104,9 +96,21 @@ class MainActivity : Activity()
 			this,
 			dbNotification,
 			settings!!.showDiscardButton,
+			settings!!.ringtoneURI,
 			null
 		)
 	}
+
+	private fun showRationale(textId: Int)
+	{
+		val builder = AlertDialog.Builder(this)
+		builder
+			.setMessage(textId)
+			.setCancelable(false)
+			.setPositiveButton("OK", {x, y -> })
+		builder.create().show()
+	}
+
 
 	private fun onNoPermissions()
 	{
@@ -124,21 +128,11 @@ class MainActivity : Activity()
 					val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
 					startActivity(intent)
 				}
-			.setNegativeButton(R.string.cancel_quit) {
+			.setNegativeButton(R.string.cancel) {
 				DialogInterface, Int -> finish()
 			}
 
 		// Create the AlertDialog object and return it
-		builder.create().show()
-	}
-
-	private fun showRationale(textId: Int)
-	{
-		val builder = AlertDialog.Builder(this)
-		builder
-			.setMessage(textId)
-			.setCancelable(false)
-			.setPositiveButton("OK", {x, y -> })
 		builder.create().show()
 	}
 

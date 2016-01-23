@@ -35,11 +35,12 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
+import android.net.Uri
 import android.provider.CalendarContract
 
 class NotificationViewManager
 {
-	public fun postNotification(ctx: Context, notification: DBNotification, showDiscard: Boolean, pendingIntent: PendingIntent?)
+	public fun postNotification(ctx: Context, notification: DBNotification, showDiscard: Boolean, ringtoneUri: Uri?, pendingIntent: PendingIntent?)
 	{
 		synchronized(NotificationManager::class.java)
 		{
@@ -77,7 +78,19 @@ class NotificationViewManager
 
 			Lw.d("NotificationViewManager: adding pending intent for discard, event id ${notification.eventId}, notificationId ${nextId}")
 
-			builder = builder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Discard", pDiscardIndent)
+			var discard = ctx.getString(R.string.discard)
+			if (discard == null)
+				discard = "DISCARD"
+
+			builder = builder.addAction(
+				android.R.drawable.ic_menu_close_clear_cancel,
+				discard,
+				pDiscardIndent)
+		}
+
+		if (ringtoneUri != null)
+		{
+			builder = builder.setSound(ringtoneUri)
 		}
 
 		var newNotification = builder.build()
