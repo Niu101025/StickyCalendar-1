@@ -40,7 +40,7 @@ import android.provider.CalendarContract
 
 class NotificationViewManager
 {
-	public fun postNotification(ctx: Context, notification: DBNotification, showDiscard: Boolean, ringtoneUri: Uri?, pendingIntent: PendingIntent?)
+	public fun postNotification(ctx: Context, notification: DBNotification, notificationSettings: NotificationSettingsSnapshot, pendingIntent: PendingIntent?)
 	{
 		synchronized(NotificationManager::class.java)
 		{
@@ -67,9 +67,9 @@ class NotificationViewManager
 			.setSmallIcon(R.drawable.stat_notify_calendar)
 			.setPriority(Notification.PRIORITY_HIGH)
 			.setContentIntent(pIndent)
-			.setAutoCancel(!showDiscard)
+			.setAutoCancel(!notificationSettings.showDiscardButton)
 
-		if (showDiscard)
+		if (notificationSettings.showDiscardButton)
 		{
 			var discardIntent = Intent(ctx, DiscardNotificationService::class.java)
 			discardIntent.putExtra(Consts.INTENT_NOTIFICATION_ID_KEY, nextId);
@@ -88,9 +88,14 @@ class NotificationViewManager
 				pDiscardIndent)
 		}
 
-		if (ringtoneUri != null)
+		if (notificationSettings.ringtoneUri != null)
 		{
-			builder = builder.setSound(ringtoneUri)
+			builder = builder.setSound(notificationSettings.ringtoneUri)
+		}
+
+		if (notificationSettings.vibraOn)
+		{
+			builder = builder.setVibrate(longArrayOf(800));
 		}
 
 		var newNotification = builder.build()

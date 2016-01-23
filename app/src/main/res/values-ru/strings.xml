@@ -46,10 +46,12 @@
 	<string name="delay_notification_summary">Оригинальное уведомление от Google Календаря будет удалено с 3х секундной задержкой, таким образом уведомление успеет проиграть звук</string>
 
 	<string name="play_reminder_sound">Свой звук уведомления</string>
-	<string name="play_reminder_sound_summary">Альтернативное решение проблем со звуком - играть собственное звуковое уведомление</string>
+	<string name="play_reminder_sound_summary">Альтернативное решение проблем со звуком - играть собственное звуковое уведомление. Выключите "Отложить замену" при использовании этой опции (кроме случаев когда требуется двойное уведомление о событиях)</string>
 
 	<string name="ringtone_selection">Звук уведомления</string>
 	<string name="ringtone_selection_summary">Выберете звук для уведомлений</string>
+
+	<string name="vibra_on">Вибро-уведомление</string>
 
 
 </resources>

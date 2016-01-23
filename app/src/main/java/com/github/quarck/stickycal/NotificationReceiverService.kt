@@ -35,6 +35,7 @@ import android.content.Intent
 import android.os.*
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import java.lang.reflect.Method
 import java.util.*
 
 class NotificationReceiverService : NotificationListenerService(), Handler.Callback
@@ -46,6 +47,8 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 	private var settings: Settings? = null
 
 	private var db: SavedNotifications? = null
+
+	private var handler: Handler? = null
 
 	override fun handleMessage(msg: Message): Boolean
 	{
@@ -116,6 +119,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		super.onCreate()
 		settings = Settings(this)
 		db = SavedNotifications(this)
+		handler = Handler()
 	}
 
 	override fun onDestroy()
@@ -132,11 +136,9 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 	}
 
 
-	fun processNotification(context: Context, originalNotification: Notification) : Boolean
+	fun parseNotification(originalNotification: Notification): DBNotification?
 	{
-		var canRemoveOriginal = true
-
-		var ret =  true
+		var dbEntry : DBNotification? = null
 
 		var (title, text) = originalNotification.getTitleAndText();
 
@@ -147,9 +149,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 			Lw.d(TAG, "Parsed event: id:${eventId}, title=${title}")
 
 			// Only process if we have full set of data we have to have
-			var dbEntry = db!!.addNotification(eventId, title, text)
-			notificationMgr.postNotification(context, dbEntry, settings!!.showDiscardButton,
-				settings!!.ringtoneURI, originalNotification.contentIntent)
+			dbEntry = db!!.addNotification(eventId, title, text)
 		}
 		else if (originalNotification.isGoogleCalendarReminder())
 		{
@@ -157,15 +157,14 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 			// and there is no reason for this as well - Calendar Reminders would stay
 			// until dismissed (unlike Events)
 			Lw.d(TAG, "Not handling Reminder notification ${title}")
-			canRemoveOriginal = false;
 		}
 		else
 		{
-			canRemoveOriginal = false
+			// Something wrong and we can't parse it
 			notificationMgr!!.onNotificationParseError(this, originalNotification.contentIntent)
 		}
 
-		return canRemoveOriginal;
+		return dbEntry
 	}
 
 	override fun onNotificationPosted(notification: StatusBarNotification)
@@ -176,14 +175,16 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 
 			if (packageName in handledPackages)
 			{
-				Lw.d(TAG, "Event from the calendar, key=${notification.key}")
+				Lw.d(TAG, "Event from the calendar")
+//				if (notification.key == null)
+//					Lw.e(TAG, "Error: notification key is null!")
 
-				var canRemoveOriginal = processNotification(this, notification.getNotification());
+				var dbNotification = parseNotification(notification.notification);
 
-				if (settings!!.removeOriginal && canRemoveOriginal && notification.key != null)
+				if (dbNotification != null)
 				{
-					processCancelNotification(notification.key)
-				};
+					processNotificationSwap(notification, dbNotification);
+				}
 			}
 		}
 	}
@@ -220,8 +221,13 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 							if (dbEntry != null)
 							{
 								Lw.d(TAG, "Discard button is active and DB entry is not null - re-posting notification")
-								notificationMgr.postNotification(this, dbEntry, settings!!.showDiscardButton, null,
-									notification.notification.contentIntent)
+
+								notificationMgr.postNotification(
+									this,
+									dbEntry,
+									NotificationSettingsSnapshot(settings!!.showDiscardButton, null, false),
+									notification.notification.contentIntent
+								)
 							}
 							else
 							{
@@ -236,31 +242,68 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		}
 	}
 
-	private fun processCancelNotification(key: String?)
+	private fun processNotificationSwap(notification: StatusBarNotification, dbEntry: DBNotification)
 	{
-		if (!settings!!.delayNotificationRemoval)
+		if (!settings!!.delayNotificationSwap)
 		{
-			cancelNotification(key)
+			doProcessNotificationSwap(notification, dbEntry)
 		}
 		else
 		{
 			var powerManager = getSystemService(POWER_SERVICE) as PowerManager
 
 			var wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Consts.WAKE_LOCK_NAME);
-			if (wakeLock != null)
+
+			if (wakeLock != null && handler != null)
 			{
 				wakeLock.acquire();
 
-				Handler().postDelayed({
-					cancelNotification(key)
+				handler!!.postDelayed({
+					doProcessNotificationSwap(notification, dbEntry)
 					wakeLock.release()
 				}, 3000)
 			}
 			else
 			{
-				// fialback
-				cancelNotification(key)
+				doProcessNotificationSwap(notification, dbEntry)
 			}
+		}
+	}
+
+	private fun doProcessNotificationSwap(notification: StatusBarNotification, dbEntry: DBNotification)
+	{
+		notificationMgr.postNotification(
+			this,
+			dbEntry,
+			settings!!.notificationSettingsSnapshot,
+			notification.notification.contentIntent
+		)
+
+		// Well, this is complicated. StatusBarNotification.getKey() is only available since API level 20
+		// but on 5.x.x+ devices you have to use new API for cancelNotification, while trying to call
+		// notification.getKey() on older devices would cause exception - "method .getKey()" not found
+		// so we have to check for method existance before calling .key (shortcut for .getKey())
+		// .. or wrap it all into try/catch and use old way of doing things on exception
+		try
+		{
+			var method : Method? = null
+
+			method = StatusBarNotification::class.java.getMethod("getKey");
+
+			if (method != null && notification.key != null)
+			{
+				cancelNotification(notification.key)
+			}
+			else
+			{
+				Lw.d(TAG, "method is null or notification.key is null, using depricated API to cancel notification")
+				cancelNotification(notification.packageName, notification.tag, notification.id)
+			}
+		}
+		catch (ex: Exception)
+		{
+			Lw.d(TAG, "notification.getKey() is not implemented, using depricated API to cancel notification")
+			cancelNotification(notification.packageName, notification.tag, notification.id)
 		}
 	}
 

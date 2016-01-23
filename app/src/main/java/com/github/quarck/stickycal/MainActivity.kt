@@ -95,8 +95,7 @@ class MainActivity : Activity()
 		NotificationViewManager().postNotification(
 			this,
 			dbNotification,
-			settings!!.showDiscardButton,
-			settings!!.ringtoneURI,
+			settings!!.notificationSettingsSnapshot,
 			null
 		)
 	}

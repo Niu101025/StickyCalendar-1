@@ -37,11 +37,18 @@ fun postCachedNotifications(context: Context)
 	var settings = Settings(context)
 
 	var ringtoneUri = settings!!.ringtoneURI
+	var vibrate = settings!!.vibraOn
 
 	for (notification in db.notifications)
 	{
 		// Play only one notification with sound
-		mgr.postNotification(context, notification, settings!!.showDiscardButton, ringtoneUri, null)
+		mgr.postNotification(
+			context,
+			notification,
+			NotificationSettingsSnapshot(settings!!.showDiscardButton, ringtoneUri, vibrate),
+			null)
+
 		ringtoneUri = null
+		vibrate = false
 	}
 }
