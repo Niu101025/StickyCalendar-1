@@ -40,6 +40,7 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import android.widget.ToggleButton
 
 class MainActivity : Activity()
@@ -49,6 +50,10 @@ class MainActivity : Activity()
 	private var settings: Settings? = null
 
 	private var toggleButtonEnableService : ToggleButton? = null
+	private var toggleButtonHandlePebble : ToggleButton? = null
+
+	private var easterFirstClick : Long = 0
+	private var easterNumClicks = 0
 
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -64,6 +69,9 @@ class MainActivity : Activity()
 
 		toggleButtonEnableService = findViewById(R.id.toggleButtonEnableService) as ToggleButton
 		toggleButtonEnableService!!.isChecked = settings!!.isServiceEnabled
+
+		toggleButtonHandlePebble = findViewById(R.id.toggleButtonHandlePebble) as ToggleButton
+		toggleButtonHandlePebble!!.isChecked = settings!!.forwardToPebble
 	}
 
 	public fun OnBtnEnableServiceClick(v: View)
@@ -78,13 +86,36 @@ class MainActivity : Activity()
 		serviceClient!!.checkPermissions()
 	}
 
-	public fun OnTextViewWhyClick(v: View) = showRationale(R.string.rationale)
+	public fun OnBtnHandlePebbleClick(v: View)
+	{
+		settings!!.forwardToPebble = toggleButtonHandlePebble!!.isChecked
+		Toast.makeText(this, "Pebble enabled is is now ${settings!!.forwardToPebble}", 3).show()
+	}
 
-	public fun OnTextViewWhy2Click(v: View) = showRationale(R.string.rationale2)
+	public fun OnEasterEggClick(v: View)
+	{
+		var currentTime = System.currentTimeMillis()
 
-	public fun OnTextViewCreditsClick(v: View) = startActivity(Intent.parseUri(imageCreditUri, 0))
+		if (easterFirstClick == 0L)
+			easterFirstClick = currentTime
 
-	public fun OnTextViewKotlinClick(v: View) = startActivity(Intent.parseUri(kotlinUri, 0))
+		easterNumClicks ++
+
+		if (easterNumClicks >= 20)
+		{
+			if (currentTime - easterFirstClick < 10000)
+			{
+				toggleButtonHandlePebble!!.visibility = View.VISIBLE
+				(findViewById(R.id.buttonTest) as Button).visibility = View.VISIBLE
+				(findViewById(R.id.textViewALotOfSpaceForTest) as TextView).visibility = View.VISIBLE
+
+				Toast.makeText(this, "Hidden buttons are now active", 1).show()
+			}
+
+			easterNumClicks = 0
+			easterFirstClick = 0L
+		}
+	}
 
 	public fun OnButtonTestClick(v: View)
 	{
@@ -99,17 +130,6 @@ class MainActivity : Activity()
 			null
 		)
 	}
-
-	private fun showRationale(textId: Int)
-	{
-		val builder = AlertDialog.Builder(this)
-		builder
-			.setMessage(textId)
-			.setCancelable(false)
-			.setPositiveButton("OK", {x, y -> })
-		builder.create().show()
-	}
-
 
 	private fun onNoPermissions()
 	{
@@ -191,19 +211,20 @@ class MainActivity : Activity()
 
 	override fun onOptionsItemSelected(item: MenuItem): Boolean
 	{
-		val id = item.itemId
-		if (id == R.id.action_settings)
+		when (item.itemId)
 		{
-			val intent = Intent(this, SettingsActivity::class.java)
-			startActivity(intent)
+			R.id.action_settings ->
+				startActivity(Intent(this, SettingsActivity::class.java))
+
+			R.id.action_feedback ->
+				startActivity(Intent(this, HelpAndFeedbackActivity::class.java))
 		}
+
 		return super.onOptionsItemSelected(item)
 	}
 
 	companion object
 	{
 		private val TAG = "MainActivity"
-		var imageCreditUri = "http://cornmanthe3rd.deviantart.com/"
-		var kotlinUri = "https://kotlinlang.org/"
 	}
 }

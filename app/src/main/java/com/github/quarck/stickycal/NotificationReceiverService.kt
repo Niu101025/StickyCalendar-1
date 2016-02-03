@@ -176,14 +176,14 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 			if (packageName in handledPackages)
 			{
 				Lw.d(TAG, "Event from the calendar")
-//				if (notification.key == null)
-//					Lw.e(TAG, "Error: notification key is null!")
 
 				var dbNotification = parseNotification(notification.notification);
-
 				if (dbNotification != null)
 				{
 					processNotificationSwap(notification, dbNotification);
+
+					if (settings!!.forwardToPebble)
+						forwardNotificationToPebble(this, dbNotification.title, dbNotification.text)
 				}
 			}
 		}

@@ -65,6 +65,10 @@ class Settings(ctx: Context) {
 		get() = prefs!!.getBoolean(IS_DISCARD_ENABLED_KEY, false)
 		set(value) = prefs.setBoolean(IS_DISCARD_ENABLED_KEY, value)
 
+	var showSnoozeButton: Boolean
+		get() = prefs!!.getBoolean(IS_SNOOZE_ENABLED_KEY, false)
+		set(value) = prefs.setBoolean(IS_SNOOZE_ENABLED_KEY, value)
+
 	var delayNotificationSwap: Boolean
 		get() = prefs!!.getBoolean(DELAY_NOTIFICATION_SWAP_KEY, false)
 		set(value) = prefs.setBoolean(DELAY_NOTIFICATION_SWAP_KEY, value)
@@ -76,6 +80,10 @@ class Settings(ctx: Context) {
 	var vibraOn: Boolean
 		get() = prefs!!.getBoolean(VIBRA_KEY, false)
 		set(value) = prefs.setBoolean(VIBRA_KEY, value)
+
+	var forwardToPebble: Boolean
+		get() = prefs!!.getBoolean(FORWARD_TO_PEBBLE_KEY, false)
+		set(value) = prefs.setBoolean(FORWARD_TO_PEBBLE_KEY, value)
 
 	val ringtoneURI: Uri?
 		get() {
@@ -114,12 +122,15 @@ class Settings(ctx: Context) {
 		private val IS_ENABLED_KEY = "pref_key_is_enabled"
 		private val REMOVE_ORIGINAL_KEY = "remove_original"
 		private val IS_DISCARD_ENABLED_KEY = "pref_key_enable_discard_button"
+		private val IS_SNOOZE_ENABLED_KEY = "pref_key_enable_snooze_button"
 		private val DELAY_NOTIFICATION_SWAP_KEY = "delay_notification_swap"
 
 		private val PLAY_REMINDER_SOUND_KEY = "play_reminder_sound"
 		private val RINGTONE_KEY = "pref_key_ringtone"
 
 		private val VIBRA_KEY = "vibra_on"
+
+		private val FORWARD_TO_PEBBLE_KEY = "forward_to_pebble"
 	}
 
 }

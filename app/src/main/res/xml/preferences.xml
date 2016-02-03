@@ -10,6 +10,13 @@
             android:defaultValue="false"  />
 
         <CheckBoxPreference
+            android:key="pref_key_enable_snooze_button"
+            android:summary="@string/show_snooze_summary"
+            android:title="@string/show_snooze_button"
+            android:defaultValue="false"
+            />
+
+        <CheckBoxPreference
             android:key="delay_notification_swap"
             android:summary="@string/delay_notification_summary"
             android:title="@string/delay_notification_removal"
