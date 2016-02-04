@@ -107,9 +107,10 @@ class MainActivity : Activity()
 			{
 				toggleButtonHandlePebble!!.visibility = View.VISIBLE
 				(findViewById(R.id.buttonTest) as Button).visibility = View.VISIBLE
+				(findViewById(R.id.buttonTest2) as Button).visibility = View.VISIBLE
 				(findViewById(R.id.textViewALotOfSpaceForTest) as TextView).visibility = View.VISIBLE
 
-				Toast.makeText(this, "Hidden buttons are now active", 1).show()
+				Toast.makeText(this, "Yeeeeeaaaa, hidden buttons are now active. Use them wisely!", 1).show()
 			}
 
 			easterNumClicks = 0
@@ -121,7 +122,9 @@ class MainActivity : Activity()
 	{
 		var db = SavedNotifications(this)
 
-		var dbNotification = db.addNotification(232323232, "Test Notification", "This is a test notificaiton")
+		var btnIdx : Long = if (v == findViewById(R.id.buttonTest)) 1 else 2;
+
+		var dbNotification = db.addNotification(btnIdx + 232323232, "Test Notification ${btnIdx}", "This is a test notificaiton")
 
 		NotificationViewManager().postNotification(
 			this,

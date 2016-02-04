@@ -46,7 +46,9 @@ fun SharedPreferences?.setBoolean(key: String, value: Boolean)
 data class NotificationSettingsSnapshot(
 	val showDiscardButton: Boolean,
 	val ringtoneUri: Uri?,
-	val vibraOn: Boolean )
+	val vibraOn: Boolean,
+	val ledNotificationOn: Boolean
+)
 
 class Settings(ctx: Context) {
 	private var context: Context? = null
@@ -81,6 +83,10 @@ class Settings(ctx: Context) {
 		get() = prefs!!.getBoolean(VIBRA_KEY, false)
 		set(value) = prefs.setBoolean(VIBRA_KEY, value)
 
+	var ledNotificationOn: Boolean
+		get() = prefs!!.getBoolean(LED_KEY, false)
+		set(value) = prefs.setBoolean(LED_KEY, value)
+
 	var forwardToPebble: Boolean
 		get() = prefs!!.getBoolean(FORWARD_TO_PEBBLE_KEY, false)
 		set(value) = prefs.setBoolean(FORWARD_TO_PEBBLE_KEY, value)
@@ -109,7 +115,7 @@ class Settings(ctx: Context) {
 		}
 
 	val notificationSettingsSnapshot: NotificationSettingsSnapshot
-		get() = NotificationSettingsSnapshot(showDiscardButton, ringtoneURI, vibraOn)
+		get() = NotificationSettingsSnapshot(showDiscardButton, ringtoneURI, vibraOn, ledNotificationOn)
 
 	init
 	{
@@ -129,6 +135,7 @@ class Settings(ctx: Context) {
 		private val RINGTONE_KEY = "pref_key_ringtone"
 
 		private val VIBRA_KEY = "vibra_on"
+		private val LED_KEY = "notification_led"
 
 		private val FORWARD_TO_PEBBLE_KEY = "forward_to_pebble"
 	}

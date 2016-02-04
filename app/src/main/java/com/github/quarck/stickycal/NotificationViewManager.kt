@@ -82,26 +82,34 @@ class NotificationViewManager
 			if (discard == null)
 				discard = "DISCARD"
 
-			builder = builder.addAction(
-				android.R.drawable.ic_menu_close_clear_cancel,
-				discard,
-				pDiscardIndent)
+			builder
+				.addAction(android.R.drawable.ic_menu_close_clear_cancel, discard, pDiscardIndent)
+				.setOngoing(true)
 		}
 
 		if (notificationSettings.ringtoneUri != null)
 		{
-			builder = builder.setSound(notificationSettings.ringtoneUri)
+			builder.setSound(notificationSettings.ringtoneUri)
 		}
 
 		if (notificationSettings.vibraOn)
 		{
-			builder = builder.setVibrate(longArrayOf(800));
+			builder.setVibrate(longArrayOf(800));
+		}
+
+		if (notificationSettings.ledNotificationOn)
+		{
+			builder.setLights(0x7f0000ff, 300, 2000);
 		}
 
 		var newNotification = builder.build()
 
+//		newNotification.flags = newNotification.flags or ;
+
 		notificationManager.notify(
-			"${Consts.NOTIFICATION_TAG};${notification.eventId}", nextId, builder.build())
+			"${Consts.NOTIFICATION_TAG};${notification.eventId}",
+			nextId,
+			newNotification)
 	}
 
 	fun removeNotification(ctx: Context, eventId: Long, notificationId: Int)

@@ -225,7 +225,12 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 								notificationMgr.postNotification(
 									this,
 									dbEntry,
-									NotificationSettingsSnapshot(settings!!.showDiscardButton, null, false),
+									NotificationSettingsSnapshot(
+										settings!!.showDiscardButton,
+										null,
+										false,
+										settings!!.ledNotificationOn
+									),
 									notification.notification.contentIntent
 								)
 							}

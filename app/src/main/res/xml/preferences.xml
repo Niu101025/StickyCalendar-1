@@ -9,17 +9,23 @@
             android:title="@string/show_discard_button"
             android:defaultValue="false"  />
 
-        <CheckBoxPreference
+        <!-- CheckBoxPreference
             android:key="pref_key_enable_snooze_button"
             android:summary="@string/show_snooze_summary"
             android:title="@string/show_snooze_button"
             android:defaultValue="false"
-            />
+            / -->
 
         <CheckBoxPreference
             android:key="delay_notification_swap"
             android:summary="@string/delay_notification_summary"
             android:title="@string/delay_notification_removal"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="notification_led"
+            android:summary="@string/notification_light_summary"
+            android:title="@string/notification_light_title"
             android:defaultValue="true" />
 
         <CheckBoxPreference

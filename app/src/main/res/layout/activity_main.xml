@@ -71,15 +71,6 @@
             android:clickable="true"
             />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Test Notificatin"
-            android:id="@+id/buttonTest"
-            android:onClick="OnButtonTestClick"
-            android:layout_gravity="center_horizontal"
-            android:visibility="gone"/>
-
         <ToggleButton
             android:id="@+id/toggleButtonHandlePebble"
             android:onClick="OnBtnHandlePebbleClick"
@@ -92,12 +83,30 @@
             android:layout_gravity="center_horizontal"
             android:visibility="gone"/>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test Notification 1"
+            android:id="@+id/buttonTest"
+            android:onClick="OnButtonTestClick"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test Notification 2"
+            android:id="@+id/buttonTest2"
+            android:onClick="OnButtonTestClick"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="\n\nJust a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. \n\n"
+            android:text="\n\n[This is for testing UI layout]\nJust a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. Just a lot of text to make it scrolling. \n\n"
             android:id="@+id/textViewALotOfSpaceForTest"
             android:visibility="gone"/>
 

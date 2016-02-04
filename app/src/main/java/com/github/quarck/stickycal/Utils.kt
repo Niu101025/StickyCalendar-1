@@ -45,7 +45,7 @@ fun postCachedNotifications(context: Context)
 		mgr.postNotification(
 			context,
 			notification,
-			NotificationSettingsSnapshot(settings!!.showDiscardButton, ringtoneUri, vibrate),
+			NotificationSettingsSnapshot(settings!!.showDiscardButton, ringtoneUri, vibrate, settings!!.ledNotificationOn),
 			null)
 
 		ringtoneUri = null

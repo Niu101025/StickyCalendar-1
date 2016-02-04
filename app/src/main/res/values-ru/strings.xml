@@ -57,6 +57,10 @@
 
 	<string name="vibra_on">Вибро-уведомление</string>
 
+	<string name="notification_light_summary">Использовать светодиод для уведомления об активных уведомлениях</string>
+	<string name="notification_light_title">LED уведомление</string>
+
+
 	<string name="help_feedback">Помощь и обратная связь</string>
 	<string name="feedback">Обратная связь</string>
 
