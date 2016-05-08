@@ -100,13 +100,14 @@ fun Notification.getGooleCalendarEventId(): Long?
 
 		ret =
 			originalIntent
-				.toUri(Intent.URI_INTENT_SCHEME)
-				.split(';')
-				.filter { x -> x.contains("l.eventid=") }
-				.first()
-				.split("l.eventid=")
-				.last()
-				.toLong()
+					.toUri(Intent.URI_INTENT_SCHEME)
+					.split(';')
+					.map { x -> x.toLowerCase() }
+					.filter { x -> x.contains("l.eventid=") }
+					.first()
+					.split("l.eventid=")
+					.last()
+					.toLong()
 
 	}
 	catch (ex: Exception)

@@ -91,7 +91,7 @@ class NotificationReceiverService : NotificationListenerService(), Handler.Callb
 		}
 		catch (e: RemoteException)
 		{
-			e.printStackTrace()
+			Lw.e(TAG, e.message ?: "");
 		}
 	}
 
