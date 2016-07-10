@@ -136,7 +136,7 @@ class NotificationViewManager
 				.Builder(context)
 				.setContentTitle(context.getString(R.string.access_lost))
 				.setContentText(context.getString(R.string.reenable_app))
-				.setSmallIcon(R.drawable.ic_launcher)
+				.setSmallIcon(R.mipmap.ic_launcher)
 				.setPriority(Notification.PRIORITY_HIGH)
 				.setContentIntent(pendingIntent)
 				.setAutoCancel(true)
